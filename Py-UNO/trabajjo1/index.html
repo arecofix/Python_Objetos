@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restful-Booker QA</title>
+    <meta name="description" content="Infraestructura avanzada para pruebas de API Restful-Booker. Programación Web II.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="theme-corporate">
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-text">Arex<span>.API</span></span>
+        </div>
+        <div class="nav-links">
+            <a href="#playground" class="active">Explorador</a>
+            <a href="#docs">Guía Técnica</a>
+            <a href="https://restful-booker.herokuapp.com/apidoc/index.html" target="_blank" rel="noopener">API Reference</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="page-header">
+            <h1>API Discovery Studio</h1>
+            <p>Entorno de certificación y validación para protocolos CRUD sobre infraestructura Restful-Booker.</p>
+        </header>
+
+        <!-- Panel de Autenticación -->
+        <section class="auth-section panel glass">
+            <div class="panel-header">
+                <h2>Security Gateway</h2>
+                <div id="auth-status" class="status-indicator">Unauthorized</div>
+            </div>
+            <div class="panel-body">
+                <div class="auth-fields">
+                    <div class="field">
+                        <label>Identity (Username)</label>
+                        <input type="text" id="auth-user" value="admin" placeholder="admin">
+                    </div>
+                    <div class="field">
+                        <label>Secret (Password)</label>
+                        <input type="password" id="auth-pass" value="password123" placeholder="password123">
+                    </div>
+                </div>
+                <button id="gen-token-btn" class="btn btn-secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    Obtain Access Token
+                </button>
+            </div>
+        </section>
+
+        <section id="playground" class="main-grid">
+            <!-- Configuración de Petición -->
+            <div class="panel glass">
+                <div class="panel-header">
+                    <h2>Request Configuration</h2>
+                    <div class="options">
+                        <select id="preset-select">
+                            <option value="">Select Blueprint...</option>
+                            <option value="get_bookings">GET List Bookings</option>
+                            <option value="get_booking_id">GET Booking Details</option>
+                            <option value="post_booking">POST Create Booking</option>
+                            <option value="put_booking">PUT Full Update</option>
+                            <option value="patch_booking">PATCH Partial Update</option>
+                            <option value="delete_booking">DELETE Remove Booking</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="flex: 0 0 120px;">
+                            <label class="field-label" style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Method</label>
+                            <select id="method">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                                <option value="PUT">PUT</option>
+                                <option value="PATCH">PATCH</option>
+                                <option value="DELETE">DELETE</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1;">
+                            <label class="field-label" style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Endpoint URL</label>
+                            <input type="text" id="url" value="https://restful-booker.herokuapp.com/booking">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Headers (JSON)</label>
+                        <textarea id="headers">{
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+}</textarea>
+                    </div>
+
+                    <div class="field" id="body-group" style="display: none;">
+                        <label>Payload (Body JSON)</label>
+                        <textarea id="body">{
+    "firstname": "Ezequiel",
+    "lastname": "Enrico Areco",
+    "totalprice": 111,
+    "depositpaid": true,
+    "bookingdates": {
+        "checkin": "2026-05-01",
+        "checkout": "2026-05-15"
+    },
+    "additionalneeds": "Breakfast"
+}</textarea>
+                    </div>
+
+                    <button id="send-btn" class="btn btn-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        Execute Operation
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel de Respuesta -->
+            <div class="panel glass">
+                <div class="panel-header">
+                    <h2>Server Response</h2>
+                    <div id="status-badge" class="status-indicator">Idle</div>
+                </div>
+                <div class="panel-body" style="height: calc(100% - 3.5rem); display: flex; flex-direction: column;">
+                    <div class="metadata">
+                        <span>Latency: <b id="resp-time">0ms</b></span>
+                        <span>Size: <b id="resp-size">0B</b></span>
+                    </div>
+                    <div class="terminal">
+                        <pre id="response-output"><code>// Output will be streamed here...</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="docs" class="guide-section">
+            <div class="section-header">
+                <h2>Technical Implementation Guide</h2>
+            </div>
+            <div class="guide-grid">
+                <div class="guide-item glass">
+                    <h3>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        Auth Architecture
+                    </h3>
+                    <p>Uses a proprietary proxy tunnel to manage CORS preflight and session token injection via secure cookies.</p>
+                </div>
+                <div class="guide-item glass">
+                    <h3>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        Data Integrity
+                    </h3>
+                    <p>Validation layer ensures that all payloads match the Restful-Booker schema before transmission.</p>
+                </div>
+                <div class="guide-item glass">
+                    <h3>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        Persistence
+                    </h3>
+                    <p>Ephemeral environment. Data resets every 10 minutes. Use ID validation for PUT/DELETE workflows.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <p>TP2 | Programación Web II | <b>Ezequiel Enrico Areco</b> | Nexus Core 2026</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

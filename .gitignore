@@ -1,0 +1,55 @@
+# --- Python ---
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+
+# --- Database ---
+*.sqlite
+*.db
+!Back-end/models.py
+!Back-end/app.py
+
+# --- Node / Angular ---
+node_modules/
+dist/
+.angular/
+.npm
+.yarn-integrity
+*.log
+
+# --- Tauri ---
+src-tauri/target/
+src-tauri/binaries/
+Front-end/src-tauri/target/
+
+# --- Environment ---
+.env
+.env.local
+.env.*.local
+.venv
+
+# --- System ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- VS Code ---
+.vscode/
+*.code-workspace
