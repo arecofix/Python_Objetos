@@ -39,7 +39,7 @@ python -m venv venv
 .\venv\Scripts\activate
 # Linux/Mac:
 source venv/bin/activate
-pip install flask flask-sqlalchemy
+pip install -r requirements.txt
 python app.py
 ```
 
