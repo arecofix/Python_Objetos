@@ -1,0 +1,181 @@
+<div class="max-w-4xl mx-auto text-base-content">
+    <div class="flex items-center gap-4 mb-6">
+        <a routerLink="/admin/employees" class="btn btn-circle btn-ghost text-base-content">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1 class="text-2xl font-bold text-green-600">{{ id ? 'Editar' : 'Nuevo' }} Empleado</h1>
+    </div>
+
+    <form (ngSubmit)="save()">
+        <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-200 mb-6 text-base-content">
+            @if (error()) {
+            <div class="alert alert-error mb-6">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>{{ error() }}</span>
+            </div>
+            }
+
+            <!-- Selector de modo de creación (solo para nuevos empleados) -->
+            @if (!id) {
+            <div class="mb-6">
+                <label for="emp-creation-mode" class="block text-sm font-medium text-base-content mb-3">Tipo de Creación</label>
+                <div class="flex gap-4">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="creationMode" value="new" 
+                               [(ngModel)]="creationModeValue" 
+                               (change)="onCreationModeChange('new')"
+                               class="radio radio-primary mr-2">
+                        <span class="text-base-content">Crear nuevo usuario</span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="creationMode" value="existing" 
+                               [(ngModel)]="creationModeValue" 
+                               (change)="onCreationModeChange('existing')"
+                               class="radio radio-primary mr-2">
+                        <span class="text-base-content">Asignar usuario existente</span>
+                    </label>
+                </div>
+            </div>
+            }
+
+            <!-- Selector de usuarios existentes -->
+            @if (!id && creationMode() === 'existing') {
+            <div class="mb-6">
+                <label for="emp-existing-user" class="block text-sm font-medium text-base-content mb-1.5">
+                    Seleccionar Usuario Existente
+                    @if (loadingUsers()) {
+                    <span class="loading loading-spinner loading-xs ml-2"></span>
+                    }
+                </label>
+                <select id="emp-existing-user" [(ngModel)]="selectedUserIdValue" 
+                        (change)="onUserSelect($any($event.target).value)"
+                        name="selectedUser"
+                        autocomplete="off"
+                        class="w-full bg-base-100 text-base-content border border-base-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 transition-all duration-200 ease-in-out shadow-sm hover:border-base-content/40">
+                    <option value="">-- Seleccione un usuario --</option>
+                    @for (user of availableUsers(); track user.id) {
+                    <option [value]="user.id">
+                        {{ user.email }} 
+                        @if (user.first_name || user.last_name) {
+                        - {{ user.first_name }} {{ user.last_name }}
+                        }
+                    </option>
+                    }
+                </select>
+                @if (availableUsers().length === 0 && !loadingUsers()) {
+                <p class="text-sm text-base-content/60 mt-2">
+                    No hay usuarios disponibles para asignar como empleados.
+                </p>
+                }
+            </div>
+            }
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="emp-first_name" class="block text-sm font-medium text-base-content mb-1.5">Nombre</label>
+                    <input id="emp-first_name" type="text" [(ngModel)]="form().first_name" name="first_name"
+                           autocomplete="given-name" 
+                           class="w-full bg-base-100 text-base-content border border-base-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 transition-all duration-200 ease-in-out shadow-sm hover:border-base-content/40"
+                           [disabled]="creationMode() === 'existing' && !!selectedUserId()"
+                           required>
+                </div>
+                <div>
+                    <label for="emp-last_name" class="block text-sm font-medium text-base-content mb-1.5">Apellido</label>
+                    <input id="emp-last_name" type="text" [(ngModel)]="form().last_name" name="last_name"
+                           autocomplete="family-name" 
+                           class="w-full bg-base-100 text-base-content border border-base-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 transition-all duration-200 ease-in-out shadow-sm hover:border-base-content/40"
+                           [disabled]="creationMode() === 'existing' && !!selectedUserId()"
+                           required>
+                </div>
+
+                <div>
+                    <label for="emp-email" class="block text-sm font-medium text-base-content mb-1.5">
+                        Email (Requerido para inicio de sesión)
+                        @if (creationMode() === 'existing' && selectedUserId()) {
+                        <span class="text-xs text-base-content/60 ml-1">(No editable)</span>
+                        }
+                    </label>
+                    <input id="emp-email" type="email" [(ngModel)]="form().email" name="email"
+                           autocomplete="email" 
+                           class="w-full bg-base-100 text-base-content border border-base-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 transition-all duration-200 ease-in-out shadow-sm hover:border-base-content/40"
+                           [disabled]="!!id || (creationMode() === 'existing' && !!selectedUserId())"
+                           required>
+                </div>
+
+                <div>
+                    <label for="emp-phone" class="block text-sm font-medium text-base-content mb-1.5">Teléfono</label>
+                    <input id="emp-phone" type="tel" [(ngModel)]="form().phone" name="phone"
+                           autocomplete="tel" 
+                           class="w-full bg-base-100 text-base-content border border-base-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 transition-all duration-200 ease-in-out shadow-sm hover:border-base-content/40"
+                           [disabled]="creationMode() === 'existing' && !!selectedUserId()">
+                </div>
+
+                <div>
+                    <label for="emp-role" class="block text-sm font-medium text-base-content mb-1.5">Rol en el Sistema</label>
+                    <select id="emp-role" [(ngModel)]="form().role" name="role"
+                            autocomplete="off" 
+                            class="w-full bg-base-100 text-base-content border border-base-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 transition-all duration-200 ease-in-out shadow-sm hover:border-base-content/40" 
+                            required>
+                        <option value="staff">Empleado / Técnico</option>
+                        <option value="admin">Administrador (Control Total)</option>
+                    </select>
+                </div>
+
+                @if (!id && creationMode() === 'new') {
+                <div>
+                    <label for="emp-password" class="block text-sm font-medium text-base-content mb-1.5">Contraseña</label>
+                    <input id="emp-password" type="password" [(ngModel)]="form().password" name="password"
+                           autocomplete="new-password" 
+                           class="w-full bg-base-100 text-base-content border border-base-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 transition-all duration-200 ease-in-out shadow-sm hover:border-base-content/40"
+                           required minlength="6" placeholder="Mínimo 6 caracteres">
+                </div>
+                }
+            </div>
+
+            <!-- Información de modo de creación -->
+            @if (!id && creationMode() === 'existing' && selectedUserId()) {
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle"></i>
+                <span>
+                    Estás asignando el usuario existente como empleado. 
+                    El usuario ya tiene acceso al sistema y solo se le asignará el rol seleccionado.
+                </span>
+            </div>
+            }
+
+            @if (!id && creationMode() === 'new') {
+            <div class="alert alert-success mt-4">
+                <i class="fas fa-user-plus"></i>
+                <span>
+                    Se creará un nuevo usuario con acceso al sistema. 
+                    Recibirá un email de confirmación y podrá iniciar sesión con la contraseña proporcionada.
+                </span>
+            </div>
+            }
+
+            <div class="mt-4">
+                <label for="emp-avatar" class="block text-sm font-medium text-base-content mb-1.5">Foto de Perfil</label>
+                <input id="emp-avatar" type="file" (change)="onFileChange($event)"
+                       class="file-input file-input-bordered file-input-primary w-full bg-base-100 text-base-content" 
+                       accept="image/*"
+                       [disabled]="creationMode() === 'existing' && !!selectedUserId()">
+                @if (form().avatar_url) {
+                <div class="mt-4">
+                    <img [src]="form().avatar_url" alt="Avatar preview"
+                         class="w-24 h-24 rounded-full object-cover border-2 border-base-200 shadow-sm">
+                </div>
+                }
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-4 mt-6">
+            <a routerLink="/admin/employees" class="btn btn-ghost">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-8" [disabled]="saving()">
+                @if (saving()) {
+                <span class="loading loading-spinner loading-xs mr-2"></span>
+                }
+                Guardar
+            </button>
+        </div>
+    </form>
+</div>

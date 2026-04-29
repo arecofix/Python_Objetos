@@ -1,0 +1,72 @@
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-green-600">Usuarios</h1>
+</div>
+
+<div class="bg-base-100 rounded-lg shadow overflow-hidden text-base-content">
+    <div class="overflow-x-auto">
+        <table class="table w-full">
+            <thead>
+                <tr class="text-base-content">
+                    <th>Usuario</th>
+                    <th>Rol en el Negocio</th>
+                    <th>Sucursal Asignada</th>
+                    <th>Fecha Registro</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (loading()) {
+                <tr>
+                    <td colspan="4" class="text-center py-4">Cargando usuarios...</td>
+                </tr>
+                } @else if (users().length === 0) {
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-gray-400">No hay usuarios registrados.</td>
+                </tr>
+                } @else {
+                @for (user of users(); track user.id) {
+                <tr>
+                    <td>
+                        <div class="flex items-center gap-3">
+                            <div class="avatar">
+                                <div class="mask mask-squircle w-12 h-12">
+                                    <img [src]="user.avatar_url || 'https://ui-avatars.com/api/?name=' + user.first_name + '+' + user.last_name"
+                                        alt="Avatar" />
+                                </div>
+                            </div>
+                            <div>
+                                <div class="font-bold">{{ user.first_name }} {{ user.last_name }}</div>
+                                <div class="text-xs opacity-50">{{ user.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="select select-sm select-bordered w-full max-w-xs"
+                                [ngModel]="user.role"
+                                (ngModelChange)="updateUserRole(user, $event)">
+                            <option value="user">Cliente (User)</option>
+                            <option value="staff">Técnico (Staff)</option>
+                            <option value="admin">Administrador (Admin)</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="select select-sm select-bordered w-full max-w-xs"
+                                [ngModel]="user.branch_id"
+                                (ngModelChange)="updateUserBranch(user, $event)"
+                                [disabled]="user.role === 'admin' || user.role === 'user'">
+                            <option [ngValue]="null">-- Sin Sucursal Asignada --</option>
+                            @for (branch of branches(); track branch.id) {
+                                <option [ngValue]="branch.id">{{ branch.name }}</option>
+                            }
+                        </select>
+                        @if(user.role === 'admin') {
+                            <div class="text-[10px] text-gray-400 mt-1">Global (Todas las sucursales)</div>
+                        }
+                    </td>
+                    <td class="text-sm opacity-70">{{ user.created_at | date:'shortDate' }}</td>
+                </tr>
+                }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

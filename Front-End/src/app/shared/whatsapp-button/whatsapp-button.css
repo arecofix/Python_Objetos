@@ -1,0 +1,94 @@
+/* Contenedor principal */
+.whatsapp-btn-container {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 99999;
+
+  /* Hardware acceleration to prevent ghosting */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+
+  font-family: sans-serif;
+}
+
+/* Botón principal */
+.whatsapp-btn {
+  width: 60px;
+  height: 60px;
+  background-color: #25d366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  /* Removed duplication-causing animation from main element */
+  z-index: 2;
+}
+
+/* New Pulse Animation via Pseudo-element to prevent ghosting */
+
+/* Estilo del ícono SVG */
+.whatsapp-btn svg {
+  width: 35px;
+  height: 35px;
+  fill: white;
+  position: relative;
+  z-index: 3;
+}
+
+/* Efectos Hover */
+.whatsapp-btn:hover {
+  background-color: #128c7e;
+  transform: scale(1.05); /* Subtle scale */
+  box-shadow: 0 8px 25px rgba(18, 140, 126, 0.5);
+}
+
+/* --- TOOLTIP (Cartel flotante) --- */
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+
+  width: 160px;
+  background-color: #075e54;
+  color: white;
+  text-align: center;
+  border-radius: 8px;
+  padding: 8px 10px;
+
+  /* Posicionamiento */
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 15px;
+
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  /* Animación de entrada */
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+/* Triangulito del tooltip */
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 25px;
+  border-width: 8px;
+  border-style: solid;
+  border-color: #075e54 transparent transparent transparent;
+}
+
+/* Mostrar Tooltip al pasar el mouse por el contenedor */
+.whatsapp-btn-container:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}

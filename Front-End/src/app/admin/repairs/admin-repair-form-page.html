@@ -1,0 +1,224 @@
+<div class="px-6 py-8 min-h-[calc(100vh-4rem)] bg-gray-50/50 dark:bg-[#0f172a] font-sans no-print">
+    <div class="max-w-6xl mx-auto animate-fade-in-up">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-white/50 dark:bg-gray-800/50 p-6 rounded-3xl backdrop-blur-lg border border-white max-sm:shadow-sm">
+        <div class="w-full md:w-auto">
+            <div class="flex items-center gap-3 mb-1">
+                <a routerLink="/admin/repairs" class="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 hover:bg-white shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all shrink-0">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-linear-to-r from-emerald-600 to-teal-500 tracking-tight truncate">
+                    {{ id ? 'Taller de Reparación' : 'Nuevo Ingreso Técnico' }}
+                </h1>
+            </div>
+            @if(id && repairForm.value.tracking_code) {
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2 flex flex-wrap items-center gap-2">
+                    <span class="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full text-xs font-mono shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
+                        <i class="fas fa-barcode text-gray-400 mr-1"></i> {{ repairForm.value.tracking_code }}
+                    </span>
+                    <span class="text-[10px] uppercase tracking-widest bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-lg border border-yellow-200 font-bold">Orden #{{ repairForm.value.repair_number | number:'3.0-0' }}</span>
+                    @if(repairForm.value.upsell_vidrio) {
+                        <span class="text-[10px] uppercase tracking-widest bg-purple-100 text-purple-700 px-2 py-0.5 rounded-lg border border-purple-200 font-bold flex items-center gap-1 shadow-sm">
+                            <i class="fas fa-star text-amber-500"></i> Vidrio Adicional
+                        </span>
+                    }
+                </div>
+            }
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-3 md:ml-auto w-full md:w-auto mt-4 md:mt-0">
+             @if (id && repairForm.value.tracking_code) {
+                <button type="button" (click)="shareWhatsApp()"
+                    class="btn bg-[#25D366] hover:bg-[#1DA851] text-white border-none rounded-xl shadow-[0_4px_15px_rgba(37,211,102,0.3)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.4)] transition-all">
+                    <i class="fab fa-whatsapp text-lg"></i> Notificar
+                </button>
+             }
+             <button type="button" (click)="printOrder()" class="btn btn-outline bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-200 hover:text-gray-900 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm transition-all" [disabled]="saving()">
+                 <i class="fas fa-print"></i> PDF / Talón
+             </button>
+        </div>
+    </div>
+
+    @if (loading()) {
+        <div class="flex flex-col items-center justify-center py-32">
+            <div class="relative w-20 h-20">
+                <div class="absolute inset-0 rounded-full border-t-4 border-emerald-500 border-opacity-20"></div>
+                <div class="absolute inset-0 rounded-full border-t-4 border-emerald-500 animate-spin"></div>
+                <i class="fas fa-microchip absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-emerald-500 text-2xl"></i>
+            </div>
+            <p class="text-emerald-600 mt-6 font-medium tracking-wide animate-pulse">Escaneando sistema...</p>
+        </div>
+    } @else {
+        
+        <form [formGroup]="repairForm" (ngSubmit)="save()" class="space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Columna Izquierda (Datos Generales) -->
+                <div class="lg:col-span-8 flex flex-col gap-8">
+                    
+                    <!-- Tarjeta: Cliente -->
+                    <app-repair-customer-section 
+                        [customerName]="repairForm.value.customer_name"
+                        [customerPhone]="repairForm.value.customer_phone"
+                        [customerEmail]="repairForm.value.customer_email"
+                        [customerDni]="repairForm.value.customer_dni"
+                        [clients]="clients"
+                        (onNameChange)="onSelectClient($event)"
+                        (onPhoneChange)="updateFormField('customer_phone', $event)"
+                        (onEmailChange)="updateFormField('customer_email', $event)"
+                        (onDniChange)="updateFormField('customer_dni', $event)">
+                    </app-repair-customer-section>
+
+                    <!-- Tarjeta: Equipo y Falla -->
+                    <app-repair-device-section
+                        [deviceModel]="repairForm.value.device_model"
+                        [imei]="repairForm.value.imei"
+                        [issueDescription]="repairForm.value.issue_description"
+                        [securityPin]="repairForm.value.security_pin"
+                        [securityPattern]="repairForm.value.security_pattern"
+                        [devicePasscode]="repairForm.value.device_passcode"
+                        [checklist]="repairForm.value.checklist"
+                        (onDeviceModelChange)="updateFormField('device_model', $event)"
+                        (onImeiChange)="updateFormField('imei', $event)"
+                        (onIssueDescriptionChange)="updateFormField('issue_description', $event)"
+                        (onSecurityPinChange)="updateFormField('security_pin', $event)"
+                        (onSecurityPatternChange)="updateFormField('security_pattern', $event)"
+                        (onDevicePasscodeChange)="updateFormField('device_passcode', $event)"
+                        (onChecklistChange)="updateFormField('checklist', $event)">
+                    </app-repair-device-section>
+
+                    <!-- Tarjeta: Gestión de Taller -->
+                    <app-repair-parts-section
+                        [parts]="parts()"
+                        [technicianNotes]="repairForm.value.technician_notes"
+                        [technicalReport]="repairForm.value.technical_report"
+                        [images]="images()"
+                        [uploadingImages]="uploadingImages()"
+                        (onRequestProductModal)="openProductModal()"
+                        (onPartsChange)="onPartsListChange($event)"
+                        (onRemovePart)="removePart($event)"
+                        (onTechnicianNotesChange)="updateFormField('technician_notes', $event)"
+                        (onTechnicalReportChange)="updateFormField('technical_report', $event)"
+                        (onFileSelected)="onFileSelected($event)"
+                        (onRemoveImage)="removeImage($event)">
+                    </app-repair-parts-section>
+
+                </div>
+
+                <!-- Columna Derecha (Finanzas y Estado) -->
+                <div class="lg:col-span-4 flex flex-col gap-8">
+                    
+                    <!-- Tarjeta: Finanzas, Estado y Presupuesto -->
+                    <app-repair-finance-section
+                        [currentStatusId]="repairForm.value.current_status_id"
+                        [estimatedCost]="repairForm.value.estimated_cost"
+                        [technicalLaborCost]="repairForm.value.technical_labor_cost"
+                        [finalCost]="repairForm.value.final_cost"
+                        [depositAmount]="repairForm.value.deposit_amount"
+                        (onStatusChange)="updateFormField('current_status_id', $event)"
+                        (onEstimatedCostChange)="onEstimatedCostChange($event)"
+                        (onLaborCostChange)="onLaborCostChange($event)"
+                        (onDepositChange)="updateFormField('deposit_amount', $event)">
+                    </app-repair-finance-section>
+
+                    <!-- Sticky Save Box -->
+                    <div class="bg-white dark:bg-gray-800/50 rounded-4xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 dark:border-gray-800 flex flex-col gap-3 sticky top-4">
+                        @if (error()) {
+                        <div class="alert alert-error text-white font-medium p-3 rounded-xl text-sm shadow-sm flex items-start">
+                            <i class="fas fa-exclamation-circle text-lg mt-0.5"></i>
+                            <span class="leading-tight">{{ error() }}</span>
+                        </div>
+                        }
+
+                        <button type="submit" class="btn btn-lg bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-none rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transform hover:-translate-y-0.5 transition-all text-lg"
+                            [disabled]="saving() || repairForm.invalid">
+                            @if (saving()) {
+                                <span class="loading loading-spinner text-white opacity-80"></span> Guardando...
+                            } @else {
+                                <i class="fas fa-save mr-1 opacity-80"></i> Guardar Ficha
+                            }
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    }
+</div>
+</div>
+
+<!-- Modal Selección de Repuestos -->
+@if (showProductModal()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm animate-fade-in px-4">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-slide-up border border-white relative">
+        <div class="bg-gray-50 dark:bg-gray-900 p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center relative">
+            <h3 class="font-bold text-xl text-gray-800 dark:text-white flex items-center gap-3">
+                <i class="fas fa-box text-emerald-500 bg-emerald-100 w-10 h-10 rounded-full flex items-center justify-center"></i> 
+                Catálogo de Stock
+            </h3>
+            <button type="button" class="btn btn-sm btn-circle btn-ghost text-gray-400 shadow-none border-none hover:bg-gray-200 focus:outline-none" (click)="showProductModal.set(false)">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+        
+        <div class="p-6">
+            <div class="form-control mb-4">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)" class="input input-bordered w-full pl-11 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:bg-white dark:focus:bg-gray-800 transition-all font-medium text-gray-700 dark:text-gray-200" placeholder="Buscar pantalla, pin de carga, batería..." />
+                    @if (searchingProducts()) {
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2">
+                            <span class="loading loading-spinner loading-xs text-emerald-500"></span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                @if (!searchingProducts() && filteredProducts().length === 0) {
+                    <div class="flex flex-col items-center justify-center py-10 opacity-50">
+                        <i class="fas fa-dolly text-5xl mb-3 text-gray-300"></i>
+                        <p class="text-sm font-medium">Buscando productos o sin resultados...</p>
+                    </div>
+                }
+
+                @if (searchingProducts() && filteredProducts().length === 0) {
+                    <div class="flex flex-col items-center justify-center py-10 opacity-50">
+                         <span class="loading loading-dots loading-lg text-emerald-500"></span>
+                    </div>
+                }
+
+                @for (product of filteredProducts(); track product.id) {
+                <div class="flex justify-between items-center py-4 border-b border-gray-50 hover:bg-emerald-50/50 transition-colors px-3 rounded-xl group/item">
+                    <div class="flex items-center gap-4">
+                        @if (product.image_url) {
+                            <img [src]="product.image_url" alt="" class="w-12 h-12 object-cover rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50" />
+                        } @else {
+                            <div class="w-12 h-12 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-300 shadow-inner">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        }
+                        <div>
+                            <div class="font-bold text-gray-800 dark:text-white text-sm mb-0.5 group-hover/item:text-emerald-700 transition-colors">{{ product.name }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded-md font-bold text-[10px] uppercase border"
+                                    [class.bg-red-50]="product.stock === 0" [class.text-red-600]="product.stock === 0" [class.border-red-100]="product.stock === 0"
+                                    [class.bg-amber-50]="product.stock > 0 && product.stock <= 5" [class.text-amber-600]="product.stock > 0 && product.stock <= 5" [class.border-amber-100]="product.stock > 0 && product.stock <= 5"
+                                    [class.bg-green-50]="product.stock > 5" [class.text-green-600]="product.stock > 5" [class.border-green-100]="product.stock > 5">
+                                    Stock: {{ product.stock }}
+                                </span>
+                                <span class="text-gray-300">|</span>
+                                <span class="font-bold text-emerald-600">{{ product.price | currency:'ARS':'symbol':'1.0-0' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm bg-gray-100 hover:bg-emerald-500 hover:text-white border-none rounded-lg text-gray-600 dark:text-gray-300 font-bold transition-all shadow-sm" (click)="addPart(product); showProductModal.set(false)" [disabled]="product.stock === 0">
+                        <i class="fas fa-plus"></i> Añadir
+                    </button>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+}

@@ -1,0 +1,381 @@
+<div class="min-h-screen bg-surface-dark text-gray-300 font-mono selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden">
+
+  <!-- Background Grid Effect -->
+  <div class="fixed inset-0 z-0 pointer-events-none opacity-20"
+    style="background-image: linear-gradient(#1f2937 1px, transparent 1px), linear-gradient(90deg, #1f2937 1px, transparent 1px); background-size: 40px 40px;">
+  </div>
+
+  <!-- Main Content Wrapper -->
+  <div class="relative z-10 pt-20 pb-20 lg:ml-20"> <!-- Margin left for sidebar if exists, adjusted -->
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24">
+
+      <!-- HERO SECTION -->
+      <section class="grid lg:grid-cols-2 gap-12 items-center">
+        <div class="space-y-8 animate-fade-in-up">
+          <div class="space-y-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+              </span>
+              Available for Hire
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold text-white tracking-tight">
+              {{ currentContent.name }}
+            </h1>
+            <h2 class="text-2xl md:text-3xl text-cyan-500 font-semibold">
+              {{ currentContent.role }}
+            </h2>
+            <div class="flex flex-col gap-2 text-gray-300 font-mono text-sm py-2">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-phone text-cyan-500"></i>
+                <a href="tel:1125960900" class="hover:text-white transition-colors">1125960900</a>
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="fas fa-envelope text-cyan-500"></i>
+                <a href="mailto:EzequielEnrico15@gmail.com" class="hover:text-white transition-colors">EzequielEnrico15@gmail.com</a>
+              </div>
+            </div>
+            <p class="text-lg text-gray-400 max-w-xl leading-relaxed border-l-4 border-cyan-700/50 pl-4">
+              {{ currentContent.tagline }}
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-4">
+            <a [href]="currentContent.cvUrl" download class="group relative px-8 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(8,145,178,0.3)] hover:shadow-[0_0_30px_rgba(8,145,178,0.5)] overflow-hidden">
+              <div class="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <span class="relative flex items-center gap-2">
+                <i class="fas fa-download"></i> Download CV
+              </span>
+            </a>
+            <a [href]="currentContent.linkedin" target="_blank" class="group relative px-8 py-4 bg-[#1a1d2d] border border-gray-700 hover:border-cyan-500/50 text-gray-300 hover:text-white rounded-lg transition-all">
+              <span class="relative">LinkedIn</span>
+            </a>
+            <a [href]="currentContent.github" target="_blank" class="group relative px-8 py-4 bg-[#1a1d2d] border border-gray-700 hover:border-cyan-500/50 text-gray-300 hover:text-white rounded-lg transition-all">
+              <span class="relative">GitHub</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- HERO TERMINAL -->
+        <div class="relative group">
+          <div class="absolute -inset-1 bg-linear-to-r from-cyan-600 to-blue-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+          <div class="relative bg-[#0d1017] rounded-lg border border-gray-800 shadow-2xl overflow-hidden font-mono text-sm leading-relaxed">
+            <!-- Terminal Header -->
+            <div class="bg-[#1a1d2d] px-4 py-2 flex items-center gap-2 border-b border-gray-800">
+              <div class="flex gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              </div>
+              <div class="text-gray-500 text-xs ml-4">root@server:~</div>
+            </div>
+            <!-- Terminal Body -->
+            <div class="p-6 text-gray-300 h-[300px] overflow-hidden flex flex-col justify-end">
+              <div class="opacity-50 mb-4">
+                <span class="text-green-500">➜</span> <span class="text-cyan-400">~</span> neofetch
+              </div>
+              <div class="grid grid-cols-[120px_1fr] gap-6 mb-4">
+                <div class="text-cyan-500 select-none">
+                  _  _
+                  (o)(o)
+                  /    \
+                  (_/__\_)
+                  _/      \_
+                </div>
+                <div class="space-y-1 text-xs md:text-sm">
+                  <div><span class="text-cyan-500 font-bold">OS</span>: Arch Linux x86_64</div>
+                  <div><span class="text-cyan-500 font-bold">Kernel</span>: 5.15.0-76-generic</div>
+                  <div><span class="text-cyan-500 font-bold">Uptime</span>: 5 years, 3 months</div>
+                  <div><span class="text-cyan-500 font-bold">Shell</span>: zsh 5.8</div>
+                  <div><span class="text-cyan-500 font-bold">Backend</span>: Node.js, Python, Java</div>
+                  <div><span class="text-cyan-500 font-bold">Database</span>: Supabase (PostgreSQL), Redis</div>
+                </div>
+              </div>
+              @for (line of terminalOutput; track line) {
+                <div class="animate-fade-in-up">
+                  <span class="text-gray-500">{{line}}</span>
+                </div>
+              }
+              <div class="flex items-center">
+                <span class="text-green-500 mr-2">➜</span>
+                <span class="animate-pulse">_</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SYSTEM STATUS / DASHBOARD -->
+      <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        @for (status of systemStatuses; track status) {
+          <div class="bg-[#131620] border border-gray-800 p-4 rounded-xl hover:border-cyan-500/30 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-gray-400 text-sm">{{ status.name }}</span>
+              <div class="flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+              </div>
+            </div>
+            <div class="flex items-end justify-between">
+              <div>
+                <div class="text-xl font-mono text-white">{{ status.latency }}ms</div>
+                <div class="text-xs text-gray-500">Latency</div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-mono text-cyan-500">{{ status.uptime }}</div>
+                <div class="text-xs text-gray-500">Uptime</div>
+              </div>
+            </div>
+            <!-- Tiny chart visualization -->
+            <div class="mt-3 flex items-end gap-1 h-8 opacity-30">
+              <div class="flex-1 bg-cyan-500 h-[40%] rounded-xs"></div>
+              <div class="flex-1 bg-cyan-500 h-[70%] rounded-xs"></div>
+              <div class="flex-1 bg-cyan-500 h-[50%] rounded-xs"></div>
+              <div class="flex-1 bg-cyan-500 h-[90%] rounded-xs"></div>
+              <div class="flex-1 bg-cyan-500 h-[60%] rounded-xs"></div>
+              <div class="flex-1 bg-cyan-500 h-[80%] rounded-xs"></div>
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- BACKEND HIGHLIGHTS & ARCHITECTURE -->
+      <section>
+        <div class="flex items-center gap-4 mb-12">
+          <h2 class="text-3xl font-bold text-white">Engineering <span class="text-cyan-500">Excellence</span></h2>
+          <div class="h-px flex-1 bg-gray-800"></div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8 mb-16">
+          @for (item of currentContent.backendHighlights; track item) {
+            <div class="bg-[#131620] border border-gray-800 p-8 rounded-2xl hover:-translate-y-2 transition-transform duration-300 group">
+              <div class="w-14 h-14 bg-cyan-500/10 rounded-lg flex items-center justify-center text-2xl text-cyan-500 mb-6 group-hover:bg-cyan-500 group-hover:text-black transition-colors">
+                <i [class]="item.icon"></i>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-3">{{ item.title }}</h3>
+              <p class="text-gray-400 leading-relaxed mb-6 h-20">{{ item.description }}</p>
+              <div class="grid grid-cols-2 gap-4 pt-6 border-t border-gray-800/50">
+                @for (stat of item.stats; track stat) {
+                  <div>
+                    <div class="text-2xl font-mono font-bold text-white">{{ stat.value }}</div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wider">{{ stat.label }}</div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Code Snippet Viewer -->
+        <div class="bg-[#0d1017] rounded-xl border border-gray-800 overflow-hidden shadow-2xl">
+          <div class="flex border-b border-gray-800 overflow-x-auto">
+            @for (snippet of currentContent.codeSnippets; track snippet; let i = $index) {
+              <button
+                (click)="activeSnippetIndex = i"
+                class="px-6 py-4 text-sm font-medium border-r border-gray-800 hover:bg-[#1a1d2d] transition-colors whitespace-nowrap"
+                [ngClass]="activeSnippetIndex === i ? 'bg-[#1a1d2d] text-cyan-400 border-b-2 border-b-cyan-500' : 'text-gray-500'">
+                {{ snippet.title }}
+              </button>
+            }
+          </div>
+          <div class="p-0 grid md:grid-cols-[1fr_300px]">
+            <div class="bg-[#0d1017] p-6 overflow-x-auto">
+              <pre class="font-mono text-sm leading-relaxed"><code class="language-typescript text-gray-300">{{ currentContent.codeSnippets[activeSnippetIndex].code }}</code></pre>
+            </div>
+            <div class="bg-[#131620] p-6 border-l border-gray-800">
+              <h4 class="text-white font-bold mb-4">Code Analysis</h4>
+              <p class="text-gray-400 text-sm leading-relaxed">
+                {{ currentContent.codeSnippets[activeSnippetIndex].description }}
+              </p>
+              <div class="mt-8">
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Tech Stack</div>
+                <div class="flex flex-wrap gap-2">
+                  <span class="px-2 py-1 bg-cyan-900/30 text-cyan-300 text-xs rounded-md border border-cyan-500/20">TypeScript</span>
+                  <span class="px-2 py-1 bg-blue-900/30 text-blue-300 text-xs rounded-md border border-blue-500/20">Clean Arch</span>
+                  <span class="px-2 py-1 bg-purple-900/30 text-purple-300 text-xs rounded-md border border-purple-500/20">Solid</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SKILLS WITH METERS -->
+      <!-- SKILLS MATRIX -->
+      <section>
+        <div class="flex items-center gap-4 mb-12">
+          <h2 class="text-3xl font-bold text-white">Technical <span class="text-cyan-500">Mastery</span></h2>
+          <div class="h-px flex-1 bg-gray-800"></div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+          @for (category of currentContent.technicalSkills; track category) {
+            <div class="bg-surface-dark p-6 rounded-2xl border border-gray-800/50 hover:border-cyan-500/30 transition-all duration-300">
+              <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                <i class="fas fa-layer-group text-cyan-500"></i>
+                {{ category.category }}
+              </h3>
+              <div class="space-y-6">
+                @for (skill of category.skills; track skill) {
+                  <div class="group flex gap-4 items-start p-3 rounded-lg hover:bg-gray-800/30 transition-colors">
+                    <div class="w-10 h-10 rounded-lg bg-[#1a1d2d] flex items-center justify-center shrink-0 border border-gray-700/50 group-hover:border-cyan-500/50 group-hover:bg-cyan-900/10 transition-all">
+                      <i [class]="skill.icon + ' text-xl text-gray-400 group-hover:text-cyan-400 transition-colors'"></i>
+                    </div>
+                    <div>
+                      <h4 class="text-white font-bold text-sm tracking-wide group-hover:text-cyan-300 transition-colors">{{ skill.name }}</h4>
+                      <p class="text-gray-500 text-xs mt-1 leading-relaxed">{{ skill.description }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- EXPERIENCE -->
+      <section>
+        <div class="flex items-center gap-4 mb-12">
+          <h2 class="text-3xl font-bold text-white">Experience <span class="text-cyan-500">Log</span></h2>
+          <div class="h-px flex-1 bg-gray-800"></div>
+        </div>
+
+        <div class="relative border-l border-gray-800 ml-4 md:ml-8 space-y-16">
+          @for (exp of currentContent.workExperience; track exp) {
+            <div class="relative pl-8 md:pl-12">
+              <!-- Timeline Dot -->
+              <div class="absolute -left-3 top-0 w-6 h-6 rounded-full bg-[#0f111a] border-4 border-cyan-600 shadow-[0_0_10px_rgba(8,145,178,0.5)]"></div>
+              <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-4 gap-2">
+                <div>
+                  <h3 class="text-2xl font-bold text-white">{{ exp.position }}</h3>
+                  <div class="text-cyan-500 text-lg">{{ exp.company }}</div>
+                </div>
+                <div class="px-4 py-1 bg-gray-800 rounded-full text-xs font-mono text-gray-300 border border-gray-700">
+                  {{ exp.period }}
+                </div>
+              </div>
+              <p class="text-gray-400 text-lg leading-relaxed mb-6 max-w-4xl">
+                {{ exp.description }}
+              </p>
+              <div class="flex flex-wrap gap-2">
+                @for (tech of exp.techStack; track tech) {
+                  <span class="px-3 py-1 bg-[#1a1d2d] hover:bg-gray-800 text-gray-300 hover:text-white text-xs font-mono rounded border border-gray-700 hover:border-cyan-500/50 transition-colors">
+                    <span class="text-cyan-500 mr-1">$</span> {{ tech }}
+                  </span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- PROJECTS SHOWCASE -->
+      <section class="pb-20">
+        <div class="flex items-center gap-4 mb-12">
+          <h2 class="text-3xl font-bold text-white">Deployed <span class="text-cyan-500">Systems</span></h2>
+          <div class="h-px flex-1 bg-gray-800"></div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+          @for (project of currentContent.projects; track project) {
+            <div
+              [class]="project.featured ? 'group relative bg-[#131620]/80 backdrop-blur-sm rounded-xl overflow-hidden border border-cyan-500/50 shadow-[0_0_30px_rgba(6,182,212,0.15)] transition-all duration-300 md:col-span-2 grid md:grid-cols-2' : 'group relative bg-[#131620] rounded-xl overflow-hidden border border-gray-800 hover:border-cyan-500/50 transition-all duration-300'">
+              <!-- Featured Project Layout -->
+              @if (project.featured) {
+                <div class="relative overflow-hidden h-64 md:h-auto min-h-[350px]">
+                  <div class="absolute inset-0 bg-cyan-900/20 z-10 mix-blend-overlay"></div>
+                  <img [ngSrc]="project.image" class="object-cover w-full h-full transform scale-100 group-hover:scale-110 transition-transform duration-700" fill />
+                </div>
+                <div class="p-6 md:p-10 flex flex-col justify-center">
+                  <div class="inline-flex items-center gap-2 mb-4">
+                    <span class="px-2 py-1 rounded bg-cyan-500 text-black text-xs font-bold uppercase tracking-wider">Featured</span>
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                  </div>
+                  <h3 class="text-3xl font-bold text-white mb-4 leading-tight">{{ project.title }}</h3>
+                  <p class="text-gray-300 mb-6 text-lg leading-relaxed">{{ project.description }}</p>
+                  @if (project.features) {
+                    <ul class="mb-8 space-y-3">
+                      @for (feature of project.features; track feature) {
+                        <li class="flex items-start gap-3 text-sm text-gray-400">
+                          <i class="fas fa-check-circle text-cyan-500 mt-1 shrink-0"></i>
+                          <span>{{ feature }}</span>
+                        </li>
+                      }
+                    </ul>
+                  }
+                  <div class="flex flex-wrap gap-2 mb-8">
+                    @for (tag of project.techStack; track tag) {
+                      <span class="text-sm font-medium text-cyan-300 bg-cyan-950/50 px-3 py-1.5 rounded border border-cyan-500/20">
+                        {{ tag }}
+                      </span>
+                    }
+                  </div>
+                  <div class="flex gap-4 mt-auto">
+                    @if (project.link) {
+                      <a [href]="project.link" target="_blank" class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition-colors flex items-center gap-2 shadow-lg shadow-cyan-500/20">
+                        <i class="fas fa-rocket"></i> View Project
+                      </a>
+                    }
+                  </div>
+                </div>
+              }
+              <!-- Standard Project Layout -->
+              @if (!project.featured) {
+                <div class="aspect-video bg-gray-900 relative overflow-hidden">
+                  <div class="absolute inset-0 bg-linear-to-b from-transparent to-[#131620] z-10 opacity-90 transition-opacity group-hover:opacity-40"></div>
+                  <img [ngSrc]="project.image" class="object-cover transform scale-100 group-hover:scale-110 transition-transform duration-700 opacity-50 group-hover:opacity-100" fill />
+                </div>
+                <div class="p-8 relative z-20 -mt-10">
+                  <h3 class="text-2xl font-bold text-white mb-2">{{ project.title }}</h3>
+                  <p class="text-gray-400 mb-6 line-clamp-2 h-12">{{ project.description }}</p>
+                  <div class="flex flex-wrap gap-2 mb-6">
+                    @for (tag of project.techStack; track tag) {
+                      <span class="text-xs text-cyan-400 bg-cyan-900/20 px-2 py-1 rounded border border-cyan-500/20">
+                        {{ tag }}
+                      </span>
+                    }
+                  </div>
+                  <div class="flex gap-4">
+                    @if (project.link) {
+                      <a [href]="project.link" target="_blank" class="text-sm font-bold text-white hover:text-cyan-400 transition-colors flex items-center gap-1">
+                        <i class="fas fa-external-link-alt"></i> Live Demo
+                      </a>
+                    }
+                    @if (project.github) {
+                      <a [href]="project.github" target="_blank" class="text-sm font-bold text-white hover:text-cyan-400 transition-colors flex items-center gap-1">
+                        <i class="fab fa-github"></i> Source Code
+                      </a>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Footer / Contact CTA -->
+      <div class="text-center pt-20 border-t border-gray-800">
+        <h2 class="text-3xl font-bold text-white mb-6">Ready to Scale Your Team?</h2>
+        <div class="flex justify-center gap-4">
+          <a routerLink="/contacto" class="px-8 py-3 bg-cyan-600 text-white rounded-lg font-bold hover:bg-cyan-500 transition-colors shadow-lg shadow-cyan-500/20 cursor-pointer">
+            Initialize Contact Protocol
+          </a>
+        </div>
+
+        <div class="mt-16 text-left">
+          <app-certificate-gallery [title]="'Verified Credentials'"></app-certificate-gallery>
+        </div>
+
+        <p class="mt-8 text-gray-600 font-mono text-xs text-center">
+          SYSTEM_ID: EZEQUIEL-ENRICO-V2.5.0 // STATUS: ONLINE
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>

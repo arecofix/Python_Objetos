@@ -1,0 +1,276 @@
+<!-- Admin Orders List Layout -->
+<div class="px-6 py-8 min-h-[calc(100vh-4rem)] bg-gray-50/50 dark:bg-[#0f172a] font-sans">
+
+  <!-- Header Minimalista -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4 animate-fade-in-down">
+    <div>
+      <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
+        <span class="w-10 h-10 rounded-2xl bg-orange-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
+          <i class="fas fa-shipping-fast"></i>
+        </span>
+        Envíos y Órdenes
+      </h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 font-medium">Gestiona y despacha los pedidos de tus clientes de la tienda online.</p>
+    </div>
+
+    <div class="flex items-center gap-3 w-full sm:w-auto">
+      <a routerLink="/admin/orders/new" class="btn w-full sm:w-auto bg-linear-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-none rounded-2xl shadow-lg shadow-orange-500/30 transform hover:-translate-y-0.5 transition-all">
+        <i class="fas fa-plus mr-1 opacity-80"></i> Crear Pedido Manual
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Dashboard (SaaS Style) -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 lg:mb-10 animate-fade-in-up" style="animation-delay: 100ms;">
+    <!-- Total KPI -->
+    <div class="bg-white dark:bg-gray-800/50 rounded-3xl p-5 md:p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 dark:border-gray-800 relative overflow-hidden group hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-blue-100 dark:hover:border-blue-900 transition-all duration-300">
+        <div class="absolute top-0 left-0 w-1.5 h-full bg-linear-to-b from-blue-400 to-blue-500 opacity-80"></div>
+        <div class="flex justify-between items-center mb-2">
+            <div class="text-gray-500 dark:text-gray-400 text-xs font-bold tracking-wider uppercase">Total Pedidos</div>
+            <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center"><i class="fas fa-list-alt"></i></div>
+        </div>
+        <div class="text-3xl font-black text-gray-900 dark:text-white">{{ stats().total }}</div>
+    </div>
+
+    <!-- Pending KPI -->
+    <div class="bg-white dark:bg-gray-800/50 rounded-3xl p-5 md:p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 dark:border-gray-800 relative overflow-hidden group hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-orange-100 dark:hover:border-orange-900 transition-all duration-300">
+        <div class="absolute top-0 left-0 w-1.5 h-full bg-linear-to-b from-orange-400 to-amber-500 opacity-80"></div>
+        <div class="flex justify-between items-center mb-2">
+            <div class="text-gray-500 dark:text-gray-400 text-xs font-bold tracking-wider uppercase">Pendientes / Proceso</div>
+            <div class="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-500/10 text-orange-500 flex items-center justify-center"><i class="fas fa-clock"></i></div>
+        </div>
+        <div class="text-3xl font-black text-gray-900 dark:text-white">{{ stats().pending }}</div>
+    </div>
+
+    <!-- Completed KPI -->
+    <div class="bg-white dark:bg-gray-800/50 rounded-3xl p-5 md:p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 dark:border-gray-800 relative overflow-hidden group hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-emerald-100 dark:hover:border-emerald-900 transition-all duration-300">
+        <div class="absolute top-0 left-0 w-1.5 h-full bg-linear-to-b from-emerald-400 to-emerald-500 opacity-80"></div>
+        <div class="flex justify-between items-center mb-2">
+            <div class="text-gray-500 dark:text-gray-400 text-xs font-bold tracking-wider uppercase">Enviados / Pagados</div>
+            <div class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 flex items-center justify-center"><i class="fas fa-check-circle"></i></div>
+        </div>
+        <div class="text-3xl font-black text-gray-900 dark:text-white">{{ stats().completed }}</div>
+    </div>
+
+    <!-- Revenue KPI -->
+    <div class="bg-white dark:bg-gray-800/50 rounded-3xl p-5 md:p-6 shadow-[0_4px_20_rgb(0,0,0,0.03)] border border-gray-100 dark:border-gray-800 relative overflow-hidden group hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-fuchsia-100 dark:hover:border-fuchsia-900 transition-all duration-300">
+        <div class="absolute top-0 left-0 w-1.5 h-full bg-linear-to-b from-fuchsia-400 to-purple-500 opacity-80"></div>
+        <div class="flex justify-between items-center mb-2">
+            <div class="text-gray-500 dark:text-gray-400 text-xs font-bold tracking-wider uppercase">Ingresos Brutos</div>
+            <div class="w-8 h-8 rounded-xl bg-fuchsia-50 dark:bg-fuchsia-500/10 text-fuchsia-500 flex items-center justify-center"><i class="fas fa-dollar-sign"></i></div>
+        </div>
+        <div class="text-2xl md:text-3xl font-black text-gray-900 dark:text-white overflow-hidden text-ellipsis">{{ stats().revenue | currency:'ARS':'symbol':'1.0-0' }}</div>
+    </div>
+  </div>
+
+  <!-- Controls Bar -->
+  <div class="flex flex-col lg:flex-row gap-4 mb-6 bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 dark:border-gray-700 items-center animate-fade-in-up" style="animation-delay: 200ms;">
+    <!-- Search -->
+    <div class="flex-1 w-full relative group">
+      <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"></i>
+      <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+        placeholder="Buscar cliente, email, # pedido..."
+        class="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium text-gray-800 dark:text-gray-200" />
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="w-full lg:w-auto overflow-x-auto custom-scrollbar pb-2 lg:pb-0">
+      <div class="flex bg-gray-50 dark:bg-gray-900 rounded-2xl p-1 border border-gray-200 dark:border-gray-700">
+         <button class="px-4 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap"
+                 [ngClass]="filterStatus() === 'all' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
+                 (click)="filterStatus.set('all')">Todos</button>
+         <button class="px-4 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap"
+                 [ngClass]="filterStatus() === 'pending' ? 'bg-white dark:bg-gray-800 text-orange-600 dark:text-orange-400 shadow-sm' : 'text-gray-500 hover:text-orange-500'"
+                 (click)="filterStatus.set('pending')">Pendientes / Proc.</button>
+         <button class="px-4 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap"
+                 [ngClass]="filterStatus() === 'paid' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 hover:text-blue-500'"
+                 (click)="filterStatus.set('paid')">Cobrados</button>
+         <button class="px-4 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap"
+                 [ngClass]="filterStatus() === 'completed' ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-500 hover:text-emerald-500'"
+                 (click)="filterStatus.set('completed')">Enviados / Listo</button>
+      </div>
+    </div>
+
+    <!-- Sort -->
+    <select [ngModel]="sortOrder()" (change)="updateSort($event)" class="w-full lg:w-auto px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-gray-700 dark:text-gray-300 cursor-pointer appearance-none">
+      <option value="date_desc">🕒 Más Recientes</option>
+      <option value="date_asc">🕰️ Más Antiguos</option>
+      <option value="total_desc">💰 Mayor Monto</option>
+    </select>
+  </div>
+
+  <!-- Content -->
+  @if (loading()) {
+    <div class="flex flex-col justify-center items-center py-20 animate-pulse">
+      <span class="loading loading-spinner text-orange-500 w-12 h-12 mb-4"></span>
+      <span class="text-sm font-medium text-gray-500">Cargando logística...</span>
+    </div>
+  } @else if (error()) {
+    <div class="bg-red-50 dark:bg-red-500/10 border-l-4 border-red-500 p-4 rounded-r-xl flex items-center gap-3 animate-fade-in text-red-700 dark:text-red-400">
+      <i class="fas fa-exclamation-triangle text-xl"></i>
+      <span class="font-medium font-sm">{{ error() }}</span>
+    </div>
+  } @else if (filteredOrders().length === 0) {
+    <div class="flex flex-col items-center justify-center py-20 animate-fade-in text-center px-4">
+      <div class="w-24 h-24 rounded-full bg-gray-50 dark:bg-gray-800 border-4 border-white dark:border-gray-900 shadow-xl flex items-center justify-center mb-6">
+        <i class="fas fa-shipping-fast text-4xl text-gray-300 dark:text-gray-600"></i>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">No se encontraron envíos</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm">No hay órdenes que coincidan con tu búsqueda o filtros actuales.</p>
+    </div>
+  } @else {
+
+    <!-- Desktop Virtual Scroll Grid -->
+    <div class="hidden md:flex flex-col bg-white dark:bg-gray-800/50 rounded-4xl shadow-[0_8px_30_rgb(0,0,0,0.04)] overflow-hidden border border-gray-100 dark:border-gray-800 animate-fade-in-up" style="animation-delay: 300ms;">
+      <!-- Virtual Scroll Header -->
+      <div class="grid grid-cols-[1fr_1.5fr_2fr_1fr_1fr_1fr_0.8fr] bg-gray-50/80 dark:bg-gray-900/50 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500 font-bold text-[10px] tracking-widest uppercase px-6 py-4">
+        <div>Pedido</div>
+        <div>Cliente info</div>
+        <div>Resumen Items</div>
+        <div>Total</div>
+        <div>Estado</div>
+        <div>Fecha</div>
+        <div class="text-right">Acciones</div>
+      </div>
+
+      <!-- Virtual Scroll Viewport -->
+      <cdk-virtual-scroll-viewport itemSize="90" class="h-[600px] orders-viewport custom-scrollbar">
+        <div *cdkVirtualFor="let order of filteredOrders()" class="grid grid-cols-[1fr_1.5fr_2fr_1fr_1fr_1fr_0.8fr] items-center px-6 py-3 hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors group border-b border-gray-50 dark:border-gray-800/50 text-sm h-[90px]">
+          
+          <!-- Pedido -->
+          <div>
+            <div class="font-mono text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-2 py-1 rounded inline-block border border-orange-100 dark:border-orange-500/20 shadow-sm">{{ order.order_number }}</div>
+          </div>
+
+          <!-- Cliente -->
+          <div class="min-w-0 pr-4">
+            <div class="font-bold text-gray-900 dark:text-white truncate" [title]="order.customer_name">{{ order.customer_name }}</div>
+            <div class="text-[10px] text-gray-500 font-mono mt-0.5 truncate"><i class="fas fa-envelope mr-1 opacity-50"></i> {{ order.customer_email || 'Sin email' }}</div>
+          </div>
+
+          <!-- Items -->
+          <div class="min-w-0 pr-4">
+            <div class="text-xs">
+                @if (order.items && order.items.length > 0) {
+                    <div class="truncate text-gray-700 dark:text-gray-300 font-medium">
+                    <span class="font-black text-gray-900 dark:text-white mr-1">{{ order.items[0].quantity }}x</span> {{ order.items[0].product_name }}
+                    </div>
+                    @if(order.items.length > 1) { 
+                    <div class="mt-1"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-gray-100 dark:bg-gray-700 text-gray-500 uppercase">+{{ order.items.length - 1 }} prod.</span></div>
+                    }
+                } @else {
+                    <span class="italic text-gray-400 text-[10px]">Caja vacía</span>
+                }
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div>
+            <div class="font-black text-gray-900 dark:text-white">{{ order.total | currency:'ARS':'symbol':'1.0-0' }}</div>
+          </div>
+
+          <!-- Estado -->
+          <div>
+            <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider text-center block w-fit"
+                [ngClass]="order.status | statusColor">
+                {{ order.status | orderStatus }}
+            </span>
+          </div>
+
+          <!-- Fecha -->
+          <div class="text-xs text-gray-500 font-medium">
+            <div>{{ order.created_at | date:'dd MMM yyyy' }}</div>
+            <div class="text-[10px] opacity-70">{{ order.created_at | date:'HH:mm' }} hs</div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+            @if (order.status === 'pending') {
+                <button (click)="toggleOrderStatus(order)" class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-colors flex items-center justify-center shadow-sm">
+                <i class="fas fa-check-double text-[10px]"></i>
+                </button>
+            }
+            <a [routerLink]="['/admin/orders', order.id]" class="w-8 h-8 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center shadow-sm">
+                <i class="fas fa-eye text-[10px]"></i>
+            </a>
+            <a [routerLink]="['/admin/orders', order.id, 'edit']" class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500 hover:text-white transition-colors flex items-center justify-center shadow-sm">
+                <i class="fas fa-pen text-[10px]"></i>
+            </a>
+          </div>
+        </div>
+      </cdk-virtual-scroll-viewport>
+    </div>
+
+    <!-- Mobile Virtual Scroll Viewport -->
+    <div class="md:hidden flex flex-col gap-4 animate-fade-in-up" style="animation-delay: 300ms;">
+        <cdk-virtual-scroll-viewport itemSize="220" class="h-[70vh] orders-viewport custom-scrollbar">
+            <div *cdkVirtualFor="let order of filteredOrders()" class="px-1 py-2">
+                <div class="bg-white dark:bg-gray-800/50 rounded-3xl p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 dark:border-gray-800">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex flex-col">
+                            <span class="font-mono text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded border border-orange-100 inline-flex w-fit mb-1">{{ order.order_number }}</span>
+                            <span class="font-black text-gray-900 dark:text-white text-lg leading-tight">{{ order.customer_name }}</span>
+                            <span class="text-[10px] text-gray-400 mt-1"><i class="far fa-clock"></i> {{ order.created_at | date:'dd MMM, HH:mm' }}</span>
+                        </div>
+                        <div class="px-2 py-1 rounded border text-[9px] font-black uppercase tracking-wider backdrop-blur-sm shadow-sm" [ngClass]="order.status | statusColor">
+                            {{ order.status | orderStatus }}
+                        </div>
+                    </div>
+    
+                    <div class="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-3 mb-4 border border-gray-100 dark:border-gray-800">
+                        <ul class="text-xs space-y-2">
+                            @for(item of (order.items || []).slice(0, 2); track item.id) {
+                                <li class="flex justify-between text-gray-700 dark:text-gray-300 font-medium">
+                                <span class="truncate pr-2"><span class="font-black text-gray-900 dark:text-white mr-1">{{ item.quantity }}x</span> {{ item.product_name }}</span>
+                                </li>
+                            }
+                            @if(order.items && order.items.length > 2) {
+                                <li class="text-[10px] text-gray-400 italic pt-1 border-t border-gray-200 dark:border-gray-700 border-dashed">+ {{ order.items.length - 2 }} productos adicionales...</li>
+                            }
+                        </ul>
+                    </div>
+    
+                    <div class="flex justify-between items-end border-t border-gray-100 dark:border-gray-800 pt-4">
+                        <div>
+                            <div class="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Total a cobrar</div>
+                            <span class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{{ order.total | currency:'ARS':'symbol':'1.0-0' }}</span>
+                        </div>
+    
+                        <div class="flex gap-2">
+                            @if(order.status === 'pending') {
+                                <button (click)="toggleOrderStatus(order)" class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-sm">
+                                <i class="fas fa-check-double text-sm"></i>
+                                </button>
+                            }
+                            <a [routerLink]="['/admin/orders', order.id]" class="w-10 h-10 rounded-2xl bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center shadow-sm">
+                                <i class="fas fa-eye text-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </cdk-virtual-scroll-viewport>
+    </div>
+
+  }
+</div>
+
+<style>
+    .orders-viewport {
+        outline: none;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #1e293b;
+    }
+</style>

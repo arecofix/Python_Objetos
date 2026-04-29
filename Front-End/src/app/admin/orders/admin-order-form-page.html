@@ -1,0 +1,287 @@
+<!-- Admin Order Form Layout -->
+<div class="px-6 py-8 min-h-[calc(100vh-4rem)] bg-gray-50/50 dark:bg-[#0f172a] font-sans">
+    
+    <!-- Header -->
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 animate-fade-in-down">
+        <div>
+            <div class="flex items-center gap-3 text-sm text-gray-500 font-medium mb-2">
+                <a routerLink="/admin/orders" class="hover:text-blue-500 transition-colors"><i class="fas fa-arrow-left mr-1"></i> Volver a Órdenes</a>
+                <span>/</span>
+                <span>{{ id ? 'Editando' : 'Nuevo' }} Pedido</span>
+            </div>
+            <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-orange-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
+                    <i class="fas fa-clipboard-list"></i>
+                </span>
+                {{ id ? 'Detalle del Pedido' : 'Crear Envío / Pedido' }}
+            </h1>
+        </div>
+        
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+            <button type="button" (click)="save()" [disabled]="saving || orderForm.invalid" class="btn w-full sm:w-auto bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-none rounded-2xl shadow-lg shadow-emerald-500/30 transform hover:-translate-y-0.5 transition-all">
+                 @if (saving) {
+                    <span class="loading loading-spinner loading-xs mr-2"></span> Guardando...
+                 } @else {
+                    <i class="fas fa-save mr-1 opacity-80"></i> Guardar
+                 }
+            </button>
+        </div>
+    </div>
+
+    <!-- Form Container -->
+    <div class="max-w-5xl mx-auto animate-fade-in-up" style="animation-delay: 100ms;">
+        <form [formGroup]="orderForm" (ngSubmit)="save()" class="space-y-6">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Content (Left, 2 cols wide) -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Customer Information Card -->
+                    <div class="bg-white dark:bg-gray-800/50 rounded-4xl p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-800 relative overflow-hidden">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
+                            <i class="fas fa-user-circle text-blue-500"></i> Información del Cliente
+                        </h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cliente / Comprador *</label>
+                                <div class="relative group">
+                                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
+                                    <input type="text" 
+                                        formControlName="customer_name"
+                                        (ngModelChange)="onSelectClient($event)"
+                                        class="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-gray-800 dark:text-gray-200"
+                                        list="clients-list"
+                                        placeholder="Buscar por nombre o escribir uno nuevo..."
+                                        required />
+                                    <datalist id="clients-list">
+                                        @for (client of clients; track client.id) {
+                                            <option [value]="client.displayName">{{ client.email }}</option>
+                                        }
+                                    </datalist>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email *</label>
+                                <input type="email" formControlName="customer_email"
+                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-gray-800 dark:text-gray-200" placeholder="ejemplo@email.com" required />
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Teléfono</label>
+                                <input type="tel" formControlName="customer_phone"
+                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-gray-800 dark:text-gray-200" placeholder="+54 9 11 1234 5678" />
+                            </div>
+
+                            <div class="md:col-span-2 pt-4 border-t border-gray-100 dark:border-gray-800 mt-2" formGroupName="shipping_address">
+                                <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                                     <i class="fas fa-map-marker-alt text-orange-500"></i> Dirección de Envío
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div class="md:col-span-2">
+                                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Calle</label>
+                                        <input type="text" formControlName="street"
+                                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-gray-800 dark:text-gray-200" placeholder="Ej: San Martin" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nro / Altura</label>
+                                        <input type="text" formControlName="number"
+                                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-gray-800 dark:text-gray-200" placeholder="123" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Ciudad</label>
+                                        <input type="text" formControlName="city"
+                                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-gray-800 dark:text-gray-200" placeholder="Ej: Rosario" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products / Items List -->
+                    <div class="bg-white dark:bg-gray-800/50 rounded-4xl p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-800">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                <i class="fas fa-box-open text-fuchsia-500"></i> Contenido del Pedido
+                            </h3>
+                            <button type="button" (click)="addItem()" class="btn btn-sm bg-fuchsia-50 hover:bg-fuchsia-100 text-fuchsia-600 border-none rounded-xl">
+                                <i class="fas fa-plus"></i> Agregar Item
+                            </button>
+                        </div>
+
+                        @if (items.length === 0) {
+                            <div class="text-center py-12 flex flex-col items-center justify-center animate-fade-in">
+                                <div class="w-16 h-16 rounded-full bg-gray-50 dark:bg-gray-900 border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center mb-4">
+                                     <i class="fas fa-shopping-basket text-2xl text-gray-300"></i>
+                                </div>
+                                <p class="text-gray-500 font-medium">El carrito de este pedido está vacío.</p>
+                                <button type="button" (click)="addItem()" class="mt-4 text-blue-500 text-sm font-bold hover:underline">Haz clic aquí para agregar uno</button>
+                            </div>
+                        } @else {
+                            <div class="space-y-3" formArrayName="items">
+                                @for (itemGroup of items.controls; track $index; let idx = $index) {
+                                  <div [formGroupName]="idx" class="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-gray-50/50 dark:bg-gray-900/50 p-4 rounded-3xl border border-gray-100 dark:border-gray-800 group transition-all hover:bg-white hover:shadow-sm">
+                                      
+                                      <div class="flex-1 w-full sm:w-auto relative">
+                                          <input type="text"
+                                            formControlName="product_name"
+                                            (ngModelChange)="onSearchProduct(idx, $event)"
+                                            (input)="onProductInput(idx, $any($event.target).value)"
+                                            (focus)="onProductFocus(idx)"
+                                            (blur)="onProductBlur(idx)"
+                                            class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 transition-all text-gray-800 dark:text-white"
+                                            placeholder="Buscar producto a enviar..." required autocomplete="off" />
+                                          
+                                          <!-- Autocomplete Dropdown -->
+                                          @if (getFilteredProducts(idx).length > 0 && showProductDropdown(idx)) {
+                                          <div class="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                            @for (product of getFilteredProducts(idx); track product.id) {
+                                            <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                                                 (click)="selectProduct(idx, product)">
+                                              <div class="flex justify-between items-start">
+                                                <div class="flex-1">
+                                                  <div class="font-medium text-gray-800 dark:text-white">{{ product.name }}</div>
+                                                  @if (product.sku) {
+                                                  <div class="text-xs text-gray-500 dark:text-gray-400">SKU: {{ product.sku }}</div>
+                                                  }
+                                                </div>
+                                                <div class="text-right ml-3">
+                                                  <div class="font-bold text-fuchsia-600 dark:text-fuchsia-400">${{ product.price }}</div>
+                                                  <div class="text-xs text-gray-500 dark:text-gray-400">Stock: {{ product.stock }}</div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                            }
+                                          </div>
+                                          }
+                                      </div>
+                                      
+                                      <div class="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+                                          <input type="number" formControlName="quantity" (ngModelChange)="onQuantityChange(idx)"
+                                            min="1"
+                                            class="w-20 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-center text-sm font-bold focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 transition-all text-gray-800 dark:text-white" />
+                                            
+                                          <span class="text-gray-400 text-xs">x</span>
+                                          
+                                          <div class="relative w-28">
+                                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                                            <input type="number" formControlName="unit_price" (ngModelChange)="onUnitPriceChange(idx)"
+                                                min="0" step="0.01"
+                                                class="w-full pl-6 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-right text-sm font-bold focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 transition-all text-gray-800 dark:text-white" />
+                                          </div>
+                                          
+                                          <button type="button" (click)="removeItem(idx)"
+                                            class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center ml-auto sm:ml-2">
+                                            <i class="fas fa-trash text-sm"></i>
+                                          </button>
+                                      </div>
+                                  </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="bg-white dark:bg-gray-800/50 rounded-4xl p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-800">
+                         <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                            <i class="far fa-comment-alt text-gray-400"></i> Notas Internas
+                        </h3>
+                        <textarea formControlName="notes" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-800 dark:text-gray-200"
+                            rows="3" placeholder="Información extra del envío, preferencias del cliente..."></textarea>
+                    </div>
+
+                </div>
+
+                <!-- Right Sidebar (Status & Totals) -->
+                <div class="space-y-6">
+                    
+                    <!-- Status & Payment Control -->
+                    <div class="bg-white dark:bg-gray-800/50 rounded-4xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-800">
+                        <div class="space-y-5">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Estado del Pedido</label>
+                                <select formControlName="status" (ngModelChange)="updateStatus($event)" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-gray-800 dark:text-white cursor-pointer appearance-none">
+                                    <option value="pending">⏳ Pendiente</option>
+                                    <option value="paid">✅ Pagado</option>
+                                    <option value="shipped">🚚 Enviado</option>
+                                    <option value="completed">🎉 Completado</option>
+                                    <option value="cancelled">❌ Cancelado</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Método de Pago</label>
+                                <select formControlName="payment_method" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-gray-800 dark:text-white cursor-pointer appearance-none">
+                                    <option value="efectivo">💵 Efectivo / Cash</option>
+                                    <option value="transferencia">🏦 Transferencia Bancaria</option>
+                                    <option value="tarjeta">💳 Tarjeta de Crédito/Débito</option>
+                                    <option value="mercadopago">📱 Mercado Pago</option>
+                                    <option value="otro">⚙️ Otro formato</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Totals (Receipt Style) -->
+                    <div class="bg-gray-900 rounded-4xl p-6 shadow-xl relative overflow-hidden group border border-gray-800">
+                         <div class="absolute -inset-1 bg-linear-to-br from-gray-800 to-gray-950 rounded-4xl opacity-50 z-0"></div>
+                         
+                         <div class="relative z-10">
+                             <h3 class="text-lg font-black text-white mb-6 flex items-center gap-2">
+                                <i class="fas fa-receipt text-emerald-400"></i> Resumen
+                             </h3>
+
+                             <div class="space-y-4">
+                                <!-- Discount Input inside Receipt -->
+                                <div class="bg-gray-800/50 p-3 rounded-2xl border border-gray-700">
+                                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Aplicar Descuento</label>
+                                     <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                                        <input type="number" formControlName="discount" (ngModelChange)="calculateTotals()"
+                                            min="0" step="0.01" class="w-full bg-gray-900 border border-gray-600 rounded-xl py-2 pl-7 pr-3 text-white focus:outline-none focus:border-blue-500 font-bold text-right transition-colors" placeholder="0.00" />
+                                     </div>
+                                </div>
+
+                                <div class="bg-white/5 p-4 rounded-2xl space-y-3 mt-4 border border-white/10">
+                                    <div class="flex justify-between items-center text-sm font-medium text-gray-300">
+                                        <span>Subtotal:</span>
+                                        <span>{{ orderForm.value.subtotal | currency:'ARS':'symbol':'1.0-2' }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-sm font-medium">
+                                        <span class="text-gray-400">Descuento:</span>
+                                        <span class="text-red-400">-{{ orderForm.value.discount | currency:'ARS':'symbol':'1.0-2' }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-sm font-medium text-gray-300">
+                                        <span>IVA (21%):</span>
+                                        <span>{{ orderForm.value.tax | currency:'ARS':'symbol':'1.0-2' }}</span>
+                                    </div>
+                                    
+                                    <div class="h-px w-full bg-gray-700 my-2"></div>
+                                    
+                                    <div class="flex justify-between items-end">
+                                        <span class="text-sm font-medium text-gray-400 uppercase tracking-widest">Total</span>
+                                        <div class="text-right">
+                                            <span class="text-3xl font-black text-white tracking-tight flex items-baseline gap-1">
+                                                <span class="text-lg text-emerald-400 font-bold">$</span>{{ orderForm.value.total | number:'1.2-2' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                             </div>
+                         </div>
+                    </div>
+
+                </div>
+            </div>
+
+            @if (error) {
+            <div class="bg-red-50 dark:bg-red-500/10 border-l-4 border-red-500 p-4 rounded-r-xl flex items-center gap-3 animate-fade-in text-red-700 dark:text-red-400 my-6">
+                <i class="fas fa-exclamation-circle text-xl"></i>
+                <span class="font-medium text-sm">{{ error }}</span>
+            </div>
+            }
+
+        </form>
+    </div>
+</div>

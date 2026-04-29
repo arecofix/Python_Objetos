@@ -1,0 +1,134 @@
+<div class="px-6 py-8 min-h-[calc(100vh-4rem)] bg-gray-50/50 dark:bg-[#0f172a] font-sans no-print text-gray-800 dark:text-gray-200">
+  <div class="max-w-6xl mx-auto animate-fade-in-up">
+    <!-- Header -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-white/50 dark:bg-gray-800/50 p-6 rounded-3xl backdrop-blur-lg border border-white dark:border-gray-800 shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all max-sm:shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+            <i class="fas fa-truck-loading"></i>
+        </div>
+        <div>
+            <h1 class="text-2xl font-black bg-clip-text text-transparent bg-linear-to-r from-green-600 to-emerald-500 tracking-tight dark:from-green-400 dark:to-emerald-300">
+                Compras a Proveedores
+            </h1>
+        </div>
+      </div>
+      <div>
+        <a routerLink="/admin/purchases/new" class="btn bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white border-none rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50">
+            <i class="fas fa-plus"></i> Registrar Compra
+        </a>
+      </div>
+    </div>
+    
+  <!-- Controls Bar -->
+  <div class="flex flex-col lg:flex-row gap-4 mb-6 bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 dark:border-gray-700 items-center animate-fade-in-up" style="animation-delay: 200ms;">
+     <h1 class="font-bold text-gray-500 ml-2">Registro de Compras (Alpha)</h1>
+     <div class="flex-1"></div>
+  </div>
+
+<!-- Content -->
+    @if (loading()) {
+        <div class="flex flex-col justify-center items-center py-20 animate-pulse">
+            <span class="loading loading-spinner text-emerald-500 w-12 h-12 mb-4"></span>
+            <span class="text-sm font-medium text-gray-500">Sincronizando registros...</span>
+        </div>
+    } @else if (purchases().length === 0) {
+        <div class="flex flex-col items-center justify-center py-24 animate-fade-in text-center px-4">
+            <div class="w-24 h-24 rounded-full bg-white dark:bg-gray-800 border-4 border-gray-50 dark:border-gray-900 shadow-xl flex items-center justify-center mb-6">
+                 <i class="fas fa-receipt text-4xl text-gray-300 dark:text-gray-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Sin Compras</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm">Aún no has registrado ninguna compra a proveedores en el sistema.</p>
+        </div>
+    } @else {
+        <!-- Desktop Table -->
+        <div class="hidden md:block bg-white dark:bg-gray-800/50 rounded-4xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden border border-gray-100 dark:border-gray-800 animate-fade-in-up" style="animation-delay: 300ms;">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50/80 dark:bg-gray-900/50 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-10">
+                    <tr class="text-gray-400 dark:text-gray-500 font-bold text-[10px] tracking-widest uppercase">
+                        <th class="px-6 py-4 rounded-tl-4xl">Fecha Registro</th>
+                        <th class="px-6 py-4">Proveedor</th>
+                        <th class="px-6 py-4 text-center">Estado / Pago</th>
+                        <th class="px-6 py-4 text-right">Monto Total</th>
+                        <th class="px-6 py-4 text-right rounded-tr-4xl">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm divide-y divide-gray-50 dark:divide-gray-800/50">
+                    @for (purchase of purchases(); track purchase.id) {
+                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="font-mono text-xs font-bold text-gray-900 dark:text-white">{{ purchase.created_at | date:'longDate' }}</div>
+                            <div class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mt-0.5"><i class="far fa-clock opacity-70"></i> {{ purchase.created_at | date:'shortTime' }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <i class="fas fa-truck text-emerald-500 dark:text-emerald-400"></i> {{ purchase.suppliers?.name || 'Proveedor S/N' }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex flex-col items-center gap-1">
+                                <!-- Status Badge -->
+                                @if(purchase.status === 'received') {
+                                    <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider backdrop-blur-sm shadow-sm bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+                                       Recibido
+                                    </span>
+                                } @else if(purchase.status === 'ordered') {
+                                    <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider backdrop-blur-sm shadow-sm bg-yellow-50 text-yellow-600 border border-yellow-100 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20">
+                                       Pendiente
+                                    </span>
+                                } @else if(purchase.status === 'cancelled') {
+                                    <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider backdrop-blur-sm shadow-sm bg-red-50 text-red-600 border border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">
+                                       Cancelado
+                                    </span>
+                                }
+                                
+                                <!-- Payment Method Badge -->
+                                <span class="text-[9px] uppercase font-bold text-gray-500 dark:text-gray-400 tracking-widest mt-1">
+                                    <i class="fas fa-wallet mr-1 opacity-70"></i> {{ purchase.payment_method || 'S/N' }}
+                                </span>
+                            </div>
+                        </td>
+                        
+                        <td class="px-6 py-4 text-right">
+                             <div class="font-black text-emerald-600 dark:text-emerald-400 text-base tracking-tight mb-0.5">{{ purchase.total_amount | currency:'ARS':'symbol':'1.0-0' }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                <!-- Placeholders -->
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="md:hidden grid grid-cols-1 gap-4 animate-fade-in-up" style="animation-delay: 300ms;">
+            @for (purchase of purchases(); track purchase.id) {
+                <div class="bg-white dark:bg-gray-800/50 rounded-3xl p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 dark:border-gray-800 relative">
+                     <div class="flex justify-between items-start mb-3">
+                         <div class="flex flex-col gap-1">
+                             <span class="font-black text-gray-900 dark:text-white text-lg leading-tight mt-1 flex items-center gap-2"><i class="fas fa-truck text-emerald-500 text-sm"></i> {{ purchase.suppliers?.name || 'S/N' }}</span>
+                             <span class="font-mono text-xs text-gray-500"><i class="far fa-calendar mr-1"></i> {{ purchase.created_at | date:'shortTime' }}</span>
+                         </div>
+                     </div>
+                     <div class="flex justify-between items-end mt-4 pt-4 border-t border-gray-50 dark:border-gray-700/50">
+                          <div class="font-black text-emerald-600 dark:text-emerald-400 text-xl tracking-tight">{{ purchase.total_amount | currency:'ARS':'symbol':'1.0-0' }}</div>
+                          @if(purchase.status === 'received') {
+                              <span class="px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-wider backdrop-blur-sm shadow-sm bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">Recibido</span>
+                          } @else if(purchase.status === 'ordered') {
+                              <span class="px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-wider backdrop-blur-sm shadow-sm bg-yellow-50 text-yellow-600 border border-yellow-100 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20">Pendiente</span>
+                          } @else if(purchase.status === 'cancelled') {
+                              <span class="px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-wider backdrop-blur-sm shadow-sm bg-red-50 text-red-600 border border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">Cancelado</span>
+                          }
+                     </div>
+                     <!-- Added payment method mobile -->
+                     <div class="text-right mt-1">
+                         <span class="text-[9px] uppercase font-bold text-gray-500 tracking-widest"><i class="fas fa-wallet opacity-70"></i> {{ purchase.payment_method || 'S/N' }}</span>
+                     </div>
+                </div>
+            }
+        </div>
+    }
+  </div>
+</div>

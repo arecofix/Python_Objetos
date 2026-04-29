@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "arecofix-20698"
+  },
+  "targets": {
+    "arecofix-20698": {
+      "hosting": {
+        "areco-fix": [
+          "areco-fix"
+        ],
+        "arecofix-default": [
+            "arecofix-20698"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

@@ -1,0 +1,317 @@
+<div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Configuración de Empresa</h1>
+    </div>
+
+    <div class="card bg-base-100 shadow-lg">
+        <div class="card-body p-6">
+            @if (error()) {
+            <div class="alert alert-error mb-4 shadow-sm">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>{{ error() }}</span>
+            </div>
+            }
+            @if (success()) {
+            <div class="alert alert-success mb-4 shadow-sm">
+                <i class="fas fa-check-circle"></i>
+                <span>{{ success() }}</span>
+            </div>
+            }
+
+            <form (ngSubmit)="save()" class="space-y-6">
+                <!-- Basic Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control">
+                        <label for="comp-name" class="label">
+                            <span class="label-text font-medium">Nombre de la Empresa</span>
+                        </label>
+                        <label class="input input-bordered flex items-center gap-2">
+                            <i class="fas fa-building text-gray-400"></i>
+                            <input id="comp-name" type="text" [(ngModel)]="form().name" name="name" autocomplete="organization" class="grow" required />
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label for="comp-owner_name" class="label">
+                            <span class="label-text font-medium">Propietario</span>
+                        </label>
+                        <label class="input input-bordered flex items-center gap-2">
+                            <i class="fas fa-user text-gray-400"></i>
+                            <input id="comp-owner_name" type="text" [(ngModel)]="form().owner_name" name="owner_name" autocomplete="name" class="grow" />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control">
+                        <label for="comp-tax_id" class="label">
+                            <span class="label-text font-medium">{{ form().ruc }} (Número)</span>
+                        </label>
+                        <label class="input input-bordered flex items-center gap-2">
+                            <i class="fas fa-id-card text-gray-400"></i>
+                            <input id="comp-tax_id" type="text" [(ngModel)]="form().tax_id" name="tax_id" autocomplete="off" class="grow" placeholder="Ej: 20-12345678-9" />
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label for="comp-address" class="label">
+                            <span class="label-text font-medium">Dirección</span>
+                        </label>
+                        <label class="input input-bordered flex items-center gap-2">
+                            <i class="fas fa-map-marker-alt text-gray-400"></i>
+                            <input id="comp-address" type="text" [(ngModel)]="form().address" name="address" autocomplete="street-address" class="grow" />
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control">
+                        <label for="comp-email" class="label">
+                            <span class="label-text font-medium">Email</span>
+                        </label>
+                        <label class="input input-bordered flex items-center gap-2">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                            <input id="comp-email" type="email" [(ngModel)]="form().email" name="email" autocomplete="email" class="grow" />
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label for="comp-phone" class="label">
+                            <span class="label-text font-medium">Teléfono</span>
+                        </label>
+                        <label class="input input-bordered flex items-center gap-2">
+                            <i class="fas fa-phone text-gray-400"></i>
+                            <input id="comp-phone" type="text" [(ngModel)]="form().phone" name="phone" autocomplete="tel" class="grow" />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-control">
+                    <label for="comp-location" class="label">
+                        <span class="label-text font-medium">Ubicación</span>
+                    </label>
+                    <label class="input input-bordered flex items-center gap-2">
+                        <i class="fas fa-globe text-gray-400"></i>
+                        <input id="comp-location" type="text" [(ngModel)]="form().location" name="location" autocomplete="off" class="grow"
+                            placeholder="Ej: Buenos Aires, Argentina" />
+                    </label>
+                </div>
+
+                <div class="divider text-sm font-medium text-gray-500">Configuración Fiscal</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Porcentaje Impuesto (%)</span>
+                        </label>
+                        <label class="input input-bordered flex items-center gap-2">
+                            <i class="fas fa-percent text-gray-400"></i>
+                            <input type="number" [(ngModel)]="form().tax_percentage" name="tax_percentage" class="grow" />
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Nombre del Impuesto</span>
+                        </label>
+                        <label class="input input-bordered flex items-center gap-2">
+                            <i class="fas fa-tag text-gray-400"></i>
+                            <input type="text" [(ngModel)]="form().tax_abbreviation" name="tax_abbreviation" class="grow" 
+                                placeholder="Ej: IVA" />
+                        </label>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Nombre de Identificación</span>
+                        </label>
+                        <label class="input input-bordered flex items-center gap-2">
+                            <i class="fas fa-fingerprint text-gray-400"></i>
+                            <input type="text" [(ngModel)]="form().ruc" name="ruc_name" class="grow" 
+                                placeholder="Ej: CUIT, CUIL, RUC" />
+                        </label>
+                    </div>
+                    <div class="form-control">
+                  <label class="label font-bold text-gray-700 dark:text-gray-300">Moneda Base</label>
+                  <select [(ngModel)]="form().currency" name="currency" class="select select-bordered w-full">
+                    <option value="ARS">ARS - Peso Argentino</option>
+                    <option value="USD">USD - Dólar Estadounidense</option>
+                  </select>
+                </div>
+
+                <div class="form-control">
+                  <label class="label font-bold text-gray-700 dark:text-gray-300">
+                    <span class="flex items-center gap-2">
+                       <i class="fas fa-dollar-sign text-indigo-500"></i> Cotización Dólar (Hoy)
+                    </span>
+                  </label>
+                  <div class="relative group">
+                    <div class="absolute -inset-0.5 bg-linear-to-r from-blue-500 to-indigo-600 rounded-lg blur opacity-10 group-focus-within:opacity-30 transition"></div>
+                    <input type="number" [(ngModel)]="form().usd_rate" name="usd_rate" step="0.01"
+                      class="input input-bordered w-full font-bold text-indigo-600 dark:text-indigo-400 text-lg relative" placeholder="1.00" />
+                  </div>
+                  <p class="text-[10px] text-gray-400 mt-1">Este valor se usará para convertir precios de productos en USD al vender en ARS o calcular reparaciones.</p>
+                </div>
+                </div>
+
+                <div class="divider text-sm font-medium text-gray-500">Branding</div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">Logo de la Empresa</span>
+                    </label>
+                    <input type="file" (change)="onFileChange($event)" class="file-input file-input-bordered w-full"
+                        accept="image/*">
+                    @if (form().logo_url) {
+                    <div class="mt-4 p-4 border rounded-lg bg-base-200 flex justify-center">
+                        <img [src]="form().logo_url" alt="Logo preview" class="h-32 object-contain">
+                    </div>
+                    }
+                </div>
+
+                <div class="flex justify-end gap-4 mt-8 pt-4 border-t border-base-200">
+                    <button type="submit" class="btn btn-primary px-8" [disabled]="saving()">
+                        @if (saving()) {
+                        <span class="loading loading-spinner"></span>
+                        }
+                        Guardar Configuración
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SUCURSALES (Branches) MANAGEMENT -->
+    <div class="card bg-base-100 shadow-lg mt-8">
+        <div class="card-body p-6">
+            <h2 class="text-xl font-bold mb-4">Gestión de Sucursales</h2>
+            <p class="text-gray-500 mb-6 text-sm">Administra las ubicaciones físicas de tu negocio. Estas podrán ser asignadas a reparaciones o inventario.</p>
+
+            <!-- Listado de Sucursales -->
+            <div class="overflow-x-auto border rounded-xl mb-8">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr class="bg-base-200">
+                            <th>Nombre / Enlace</th>
+                            <th>Dirección / Slug</th>
+                            <th class="text-center">Recargo (%)</th>
+                            <th>Estado</th>
+                            <th class="text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (branch of branches(); track branch.id) {
+                        <tr>
+                            <td>
+                                <div class="font-bold">{{ branch.name }}</div>
+                                <div class="text-[10px] opacity-70 font-mono">/{{ branch.slug }}</div>
+                            </td>
+                            <td>
+                                <div class="text-xs">{{ branch.address || '--' }}</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-outline border-emerald-500 text-emerald-600 font-bold">+{{ branch.global_markup_percentage || 0 }}%</span>
+                            </td>
+                            <td>
+                                <button class="badge cursor-pointer" 
+                                    [class.badge-success]="branch.is_active" 
+                                    [class.badge-ghost]="!branch.is_active"
+                                    (click)="toggleBranchStatus(branch)">
+                                    {{ branch.is_active ? 'Activa' : 'Inactiva' }}
+                                </button>
+                            </td>
+                            <td class="text-right">
+                                <div class="flex justify-end gap-1">
+                                    <a [routerLink]="'/' + branch.slug + '/admin'" class="btn btn-primary btn-sm rounded-xl gap-2 shadow-sm font-bold" title="Administrar Panel de Sucursal">
+                                        <i class="fas fa-external-link-alt text-xs"></i>
+                                        <span>Administrar</span>
+                                    </a>
+                                    <button class="btn btn-ghost btn-sm text-blue-500" (click)="openEditBranchModal(branch)" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-ghost btn-sm text-error" (click)="deleteBranch(branch.id)" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                        @if (branches().length === 0) {
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-gray-500">No hay sucursales registradas.</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Formulario para agregar Nueva Sucursal -->
+            <div class="bg-base-200 p-6 rounded-xl border border-base-300">
+                <h3 class="font-bold text-lg mb-4"><i class="fas fa-plus-circle text-primary mr-2"></i>Agregar Nueva Sucursal</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-end">
+                    <div class="form-control">
+                        <label for="branch-name" class="label"><span class="label-text">Nombre Sucursal</span></label>
+                        <input id="branch-name" type="text" [(ngModel)]="newBranch().name" name="branch_name" autocomplete="off" class="input input-bordered w-full" placeholder="Ej: Zona Centro" />
+                    </div>
+                    <div class="form-control">
+                        <label for="branch-slug" class="label"><span class="label-text">Slug (URL)</span></label>
+                        <input id="branch-slug" type="text" [(ngModel)]="newBranch().slug" name="branch_slug" autocomplete="off" class="input input-bordered w-full font-mono text-xs" placeholder="zona-centro" />
+                    </div>
+                    <div class="form-control">
+                        <label for="branch-markup" class="label"><span class="label-text">Recargo Global (%)</span></label>
+                        <input id="branch-markup" type="number" [(ngModel)]="newBranch().global_markup_percentage" name="branch_markup" autocomplete="off" class="input input-bordered w-full" placeholder="0" />
+                    </div>
+                    <div class="form-control">
+                        <label for="branch-address" class="label"><span class="label-text">Dirección (Opcional)</span></label>
+                        <input id="branch-address" type="text" [(ngModel)]="newBranch().address" name="branch_address" autocomplete="off" class="input input-bordered w-full" placeholder="Ej: San Martin 123" />
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <label class="cursor-pointer label flex gap-2">
+                        <input type="checkbox" [(ngModel)]="newBranch().is_active" class="checkbox checkbox-primary" />
+                        <span class="label-text">Sucursal Activa</span>
+                    </label>
+                    <button class="btn btn-primary" (click)="addBranch()" [disabled]="savingBranch() || !newBranch().name">
+                        @if(savingBranch()) { <span class="loading loading-spinner"></span> }
+                        Agregar Sucursal
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Sucursal -->
+@if (editingBranch()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm animate-fade-in px-4">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-slide-up border border-gray-100 dark:border-gray-700">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+            <h3 class="font-bold text-xl">Editar Sucursal</h3>
+            <button class="btn btn-sm btn-circle btn-ghost" (click)="editingBranch.set(null)">✕</button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text font-bold">Nombre</span></label>
+                <input type="text" [(ngModel)]="tempBranch.name" name="edit_name" class="input input-bordered w-full" />
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text font-bold">Slug</span></label>
+                <input type="text" [(ngModel)]="tempBranch.slug" name="edit_slug" class="input input-bordered w-full font-mono" />
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text font-bold">Recargo Global (%)</span></label>
+                <input type="number" [(ngModel)]="tempBranch.global_markup_percentage" name="edit_markup" class="input input-bordered w-full" />
+                <p class="text-[10px] text-gray-500 mt-1">Este porcentaje se sumará al precio de costo de los productos en esta sucursal.</p>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text font-bold">Dirección</span></label>
+                <input type="text" [(ngModel)]="tempBranch.address" name="edit_address" class="input input-bordered w-full" />
+            </div>
+        </div>
+        <div class="bg-gray-50 dark:bg-gray-900/50 p-6 flex justify-end gap-3">
+            <button class="btn btn-ghost" (click)="editingBranch.set(null)">Cancelar</button>
+            <button class="btn btn-primary px-8" (click)="updateBranch()" [disabled]="savingBranch()">
+                @if(savingBranch()) { <span class="loading loading-spinner"></span> }
+                Guardar Cambios
+            </button>
+        </div>
+    </div>
+</div>
+}

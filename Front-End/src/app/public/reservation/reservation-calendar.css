@@ -1,0 +1,14 @@
+/* Animaciones */
+button {
+  transition: all 0.2s ease;
+}
+
+/* Efecto hover para días seleccionables */
+button:not(:disabled):hover {
+  transform: scale(1.05);
+}
+
+
+.h-10 {
+  height: 2.5rem;
+}

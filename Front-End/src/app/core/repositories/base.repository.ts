@@ -1,0 +1,260 @@
+import { SupabaseClient } from '@supabase/supabase-js';
+import { inject } from '@angular/core';
+import { DatabaseError } from '../errors/application.error';
+import { LoggerService } from '../services/logger.service';
+import { TenantService } from '../services/tenant.service';
+import { SupabaseErrorHandlerService } from '../services/supabase-error-handler.service';
+import { Observable, from, map } from 'rxjs';
+import { TENANT_CONSTANTS } from '../constants/tenant.constants';
+
+/**
+ * Base Repository (SaaS Architecture)
+ * Proporciona métodos CRUD genéricos mutados. Automáticamente inyecta 
+ * y aísla métricas y datos por "tenant_id" sin que Frontend deba pensarlo.
+ */
+export abstract class BaseRepository<T extends { id?: string; tenant_id?: string }> {
+    protected abstract tableName: string;
+    
+    // Lista de tablas globales del sistema (Ejemplo). Para estas NO aplicamos Tenant Filter.
+    // Configura aquí si alguna tabla (ej. planes de precios base) es global para toda la app.
+    protected isGlobalTable: boolean = false;
+
+    // Define si la tabla utiliza la columna "deleted_at" para borrado lógico (Soft Deletes)
+    protected useSoftDeletes: boolean = false;
+
+    // Se inyecta al vuelo. Evita tener que pasarlo a mano en constructores hijos 
+    protected tenantService = inject(TenantService);
+    protected errorHandler = inject(SupabaseErrorHandlerService);
+
+    constructor(
+        protected supabase: SupabaseClient,
+        protected logger: LoggerService
+    ) { }
+
+    /**
+     * Aplica el contexto SaaS automáticamente si la tabla no es global.
+     * También aplica el filtro de Soft Deletes si la tabla lo soporta.
+     */
+    protected applyTenantFilter(query: any) {
+        let enhancedQuery = query;
+
+        if (!this.isGlobalTable) {
+            const tenantId = this.tenantService.getTenantId();
+            // Si el tenantId es real, filtramos por él explícitamente.
+            // Si es el fallback (ceros), NO filtramos para permitir que el RLS 
+            // del servidor use get_my_tenant() de forma transparente.
+            if (tenantId !== TENANT_CONSTANTS.FALLBACK_ID) {
+                enhancedQuery = enhancedQuery.eq('tenant_id', tenantId);
+            }
+        }
+
+        if (this.useSoftDeletes) {
+            enhancedQuery = enhancedQuery.is('deleted_at', null);
+        }
+
+        return enhancedQuery;
+    }
+
+    /**
+     * Aplica filtro de sucursal si se especifica un branchId.
+     * Útil para aislamiento de datos en dashboards y listados operativos.
+     */
+    protected applyBranchFilter(query: any, branchId?: string) {
+        if (branchId) {
+            return query.eq('branch_id', branchId);
+        }
+        return query;
+    }
+
+    /**
+     * Find all records for the current Tenant
+     */
+    getAll(options?: any): Observable<T[]> {
+        const fetchAll = async (): Promise<T[]> => {
+            let allData: T[] = [];
+            let fromIdx = 0;
+            let hasMore = true;
+            const CHUNK = 1000;
+
+            while (hasMore) {
+                let query = this.supabase.from(this.tableName).select('*');
+                query = this.applyTenantFilter(query);
+
+                if (options && typeof options === 'object' && options.column) {
+                    query = query.order(options.column, { ascending: options.ascending ?? true });
+                }
+
+                const { data, error } = await (query.range(fromIdx, fromIdx + CHUNK - 1) as any);
+
+                if (error) {
+                    this.errorHandler.handleError(error, `getAll ${this.tableName}`);
+                }
+
+                const batch = (data as T[]) || [];
+                allData = [...allData, ...batch];
+
+                if (batch.length < CHUNK) {
+                    hasMore = false;
+                } else {
+                    fromIdx += CHUNK;
+                }
+            }
+            return allData;
+        };
+
+        return from(fetchAll());
+    }
+
+    /**
+     * Find record by ID (safely isolated within current Tenant).
+     * Uses maybeSingle() to gracefully return null when no row is found (avoids 406/PGRST116).
+     */
+    getById(id: string): Observable<T | null> {
+        let query = this.supabase.from(this.tableName).select('*').eq('id', id);
+        query = this.applyTenantFilter(query);
+
+        return from((query as any).maybeSingle()).pipe(
+            map(({ data, error }: any) => {
+                if (error) {
+                    this.errorHandler.handleError(error, `getById ${this.tableName}`);
+                }
+                return data as T | null; // null when row doesn't exist
+            })
+        );
+    }
+
+    /**
+     * Create new record (Automáticamente empaca el Tenant ID)
+     */
+    create(item: Partial<T>): Observable<T> {
+        let tenantId = this.tenantService.getTenantId();
+        
+        // Si el tenantId es el fallback (ceros), preferimos NO enviarlo en el payload
+        // para que la base de datos aplique el DEFAULT (public.get_my_tenant()).
+        const isFallback = tenantId === TENANT_CONSTANTS.FALLBACK_ID;
+
+        const payload = this.isGlobalTable 
+            ? item 
+            : (isFallback ? { ...item } : { ...item, tenant_id: tenantId });
+
+        return from(
+            this.supabase
+                .from(this.tableName)
+                .insert(payload as any)
+                .select()
+                .single()
+        ).pipe(
+            map(({ data, error }) => {
+                if (error) {
+                    this.errorHandler.handleError(error, `create ${this.tableName}`);
+                }
+                return data as T;
+            })
+        );
+    }
+
+    /**
+     * Update existing record (Safely within tenant isolation)
+     */
+    update(id: string, item: Partial<T>): Observable<T> {
+        // En una actualización, Supabase bloquea cambiar IDs seguros (no re-mandar tenant_id es buena práctica)
+        const payload = { ...item };
+        delete payload.tenant_id; // Evita error de modificación inmutable SQL
+        delete payload.id;
+
+        let query = this.supabase.from(this.tableName).update(payload).eq('id', id);
+        query = this.applyTenantFilter(query);
+
+        return from(query.select().single()).pipe(
+            map(({ data, error }) => {
+                if (error) {
+                     this.errorHandler.handleError(error, `update ${this.tableName}`);
+                }
+                return data as T;
+            })
+        );
+    }
+
+    /**
+     * Delete record (Aislado fuertemente)
+     */
+    delete(id: string): Observable<void> {
+        let query = this.supabase.from(this.tableName).delete().eq('id', id);
+        query = this.applyTenantFilter(query);
+
+        return from(query).pipe(
+            map(({ error }) => {
+                if (error) {
+                    this.errorHandler.handleError(error, `delete ${this.tableName}`);
+                }
+            })
+        );
+    }
+
+    /**
+     * Find records with custom filter (Aislado)
+     */
+    getWhere(
+        column: string,
+        value: string | number | boolean | null,
+        orderBy?: { column: string; ascending?: boolean }
+    ): Observable<T[]> {
+        const fetchAll = async (): Promise<T[]> => {
+            let allData: T[] = [];
+            let fromIdx = 0;
+            let hasMore = true;
+            const CHUNK = 1000;
+
+            while (hasMore) {
+                let query = this.supabase
+                    .from(this.tableName)
+                    .select('*')
+                    .eq(column, value);
+                
+                query = this.applyTenantFilter(query);
+
+                if (orderBy) {
+                    query = query.order(orderBy.column, { ascending: orderBy.ascending ?? true });
+                }
+
+                const { data, error } = await (query.range(fromIdx, fromIdx + CHUNK - 1) as any);
+
+                if (error) {
+                    this.errorHandler.handleError(error, `getWhere ${this.tableName}`);
+                }
+
+                const batch = (data as T[]) || [];
+                allData = [...allData, ...batch];
+
+                if (batch.length < CHUNK) {
+                    hasMore = false;
+                } else {
+                    fromIdx += CHUNK;
+                }
+            }
+            return allData;
+        };
+
+        return from(fetchAll());
+    }
+
+    /**
+     * Count records natively at database level
+     */
+    count(): Observable<number> {
+        let query = this.supabase
+            .from(this.tableName)
+            .select('*', { count: 'exact', head: true });
+            
+        query = this.applyTenantFilter(query);
+
+        return from(query).pipe(
+            map(({ count, error }) => {
+                if (error) {
+                    this.errorHandler.handleError(error, `count ${this.tableName}`);
+                }
+                return count || 0;
+            })
+        );
+    }
+}

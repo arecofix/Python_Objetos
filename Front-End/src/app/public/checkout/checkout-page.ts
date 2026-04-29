@@ -1,0 +1,183 @@
+import { Component, inject, signal } from '@angular/core';
+
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { CartService } from '@app/shared/services/cart.service';
+import { OrderService } from '@app/features/orders/application/services/order.service';
+import { AuthService } from '@app/core/services/auth.service';
+import { Order, OrderItem } from '@app/features/orders/domain/entities/order.entity';
+import { NotificationService } from '@app/core/services/notification.service';
+import { ContactService } from '@app/core/services/contact.service';
+import { ProductService } from '@app/public/products/services/product.service';
+import { ProfileService } from '@app/core/services/profile.service';
+import { BranchService } from '@app/core/services/branch.service';
+import { firstValueFrom } from 'rxjs';
+
+@Component({
+  selector: 'app-checkout-page',
+  standalone: true,
+  imports: [ReactiveFormsModule, RouterLink],
+  templateUrl: './checkout-page.html',
+  styleUrl: './checkout-page.css',
+})
+export class CheckoutPage {
+  cartService = inject(CartService);
+  orderService = inject(OrderService);
+  authService = inject(AuthService);
+  contactService = inject(ContactService);
+  productService = inject(ProductService);
+  profileService = inject(ProfileService);
+  fb = inject(FormBuilder);
+  router = inject(Router);
+  notificationService = inject(NotificationService);
+  branchService = inject(BranchService);
+
+  checkoutForm: FormGroup = this.fb.group({
+    name: ['', [Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
+    phone: ['', [Validators.required]],
+    address: this.fb.group({
+      street: ['', [Validators.required]],
+      number: ['', [Validators.required]],
+      city: ['Marcos Paz', [Validators.required]],
+      neighborhood: [''],
+      postal_code: ['', [Validators.required, Validators.pattern('^[0-9]{4}$')]]
+    }),
+    notes: [''],
+  });
+
+  isProcessing = signal(false);
+  orderSuccess = signal(false);
+
+  async placeOrder() {
+    if (this.checkoutForm.invalid) {
+      this.checkoutForm.markAllAsTouched();
+      this.notificationService.showError(
+        'Por favor, completa todos los campos requeridos.'
+      );
+      return;
+    }
+
+    this.isProcessing.set(true);
+
+    const formVal = this.checkoutForm.getRawValue();
+    const cartItems = this.cartService.cartItems();
+    const total = this.cartService.totalPrice();
+
+    const addressStr = `${formVal.address.street} ${formVal.address.number}, ${formVal.address.neighborhood ? formVal.address.neighborhood + ', ' : ''}${formVal.address.city} (CP: ${formVal.address.postal_code})`;
+
+    const order: Order = {
+      customer_name: formVal.name,
+      customer_email: formVal.email,
+      customer_phone: formVal.phone,
+      shipping_address: formVal.address, // Structured object
+      status: 'pending',
+      subtotal: total,
+      tax: 0,
+      discount: 0,
+      total: total,
+      notes: formVal.notes,
+      user_id: this.authService.getCurrentUser()?.id,
+      branch_id: this.branchService.getCurrentBranchId() || undefined,
+    };
+
+    const orderItems: OrderItem[] = cartItems.map((item) => ({
+      product_name: item.product.name,
+      product_id: item.product.id,
+      quantity: item.quantity,
+      unit_price: item.product.price,
+      subtotal: item.product.price * item.quantity,
+    }));
+
+    try {
+      // 1. Create Order
+      order.items = orderItems;
+      const data = await firstValueFrom(this.orderService.createOrder(order));
+
+      if (!data) {
+        throw new Error('No se pudo crear la orden.');
+      }
+
+      // 2. Save Contact Message with Rich Details
+      const itemsList = cartItems
+          .map(i => `- ${i.product.name} (x${i.quantity}) - $${(i.product.price * i.quantity).toFixed(2)}`)
+          .join('\n');
+      
+      const detailedMessage = `Nuevo Pedido #${data?.order_number || 'N/A'}
+      
+Detalles del Cliente:
+Nombre: ${formVal.name}
+Email: ${formVal.email}
+Teléfono: ${formVal.phone}
+Dirección: ${addressStr}
+
+Productos:
+${itemsList}
+
+Total: $${total.toFixed(2)}
+
+Notas Adicionales:
+${formVal.notes || 'Ninguna'}`;
+
+      const messageDto = {
+        name: formVal.name,
+        email: formVal.email,
+        phone: formVal.phone,
+        subject: `[NUEVO PEDIDO] #${data?.order_number} - ${formVal.name} - $${total.toFixed(2)}`,
+        message: detailedMessage,
+      };
+      
+      const { error: msgError } = await this.contactService.createMessage(messageDto);
+      if (msgError) {
+          console.error('Message creation error (non-fatal):', msgError);
+      }
+
+      // 3. Update Profile if logged in
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser) {
+         try {
+             await this.profileService.updateProfile(currentUser.id, {
+                 phone: formVal.phone,
+                 address: formVal.address, // Save JSONB object
+                 updated_at: new Date().toISOString()
+             });
+         } catch(e) {
+             console.log('Non-critical profile update error', e);
+         }
+      }
+
+      // 4. Feature purchased products
+      // Logic: Mark purchased items as featured to create a "Trending" effect
+      const uniqueProductIds = [...new Set(cartItems.map(item => item.product.id))];
+      try {
+        const updatePromises = uniqueProductIds.map(id => 
+          firstValueFrom(this.productService.updateProduct(id, { is_featured: true }))
+        );
+        await Promise.all(updatePromises);
+      } catch (featError) {
+        console.warn('Could not update featured status for products (likely permission issue):', featError);
+        // We absorb this error because the order itself was successful
+      }
+
+
+      this.orderSuccess.set(true);
+      this.cartService.clearCart();
+      this.notificationService.showSuccess('¡Orden creada exitosamente!');
+
+    } catch (error) {
+      console.error('Checkout failed full error:', JSON.stringify(error, null, 2));
+      const errMsg = (error as any)?.message || 'Error desconocido';
+      const errCode = (error as any)?.code || 'N/A';
+      this.notificationService.showError(
+        `Hubo un error al procesar tu orden: ${errMsg} (Código: ${errCode})`
+      );
+    } finally {
+      this.isProcessing.set(false);
+    }
+  }
+}

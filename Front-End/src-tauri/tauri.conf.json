@@ -2,9 +2,9 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Arecofix-Local-Engine",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.arecofix.app",
   "build": {
-    "frontendDist": "../dist/front-end/browser",
+    "frontendDist": "../dist/arecofix/browser",
     "devUrl": "http://localhost:4200",
     "beforeDevCommand": "npm run start",
     "beforeBuildCommand": "npm run build"
@@ -25,13 +25,16 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
+    ],
+    "externalBin": [
+      "binaries/arecofix-backend"
     ]
   }
 }
