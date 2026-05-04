@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, effect, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, effect, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
@@ -41,6 +41,11 @@ export class AdminLayout implements OnInit, OnDestroy {
     return this.branchService.currentBranch()?.id || '';
   }
 
+  get basePrefix() {
+    const branch = this.branchService.currentBranch();
+    return branch?.slug ? `/${branch.slug}/admin` : '/admin';
+  }
+
   constructor() {
     effect(() => {
       const branch = this.branchService.currentBranch();
@@ -55,40 +60,42 @@ export class AdminLayout implements OnInit, OnDestroy {
 
       const baseItems = [
         { title: 'Dashboard', path: `${basePrefix}/dashboard`, icon: 'fa-chart-line', module: 'dashboard' },
+        { title: 'Ventas (TPV)', path: `${basePrefix}/sales`, icon: 'fa-cash-register', module: 'inventory' },
+        { title: 'Taller', path: `${basePrefix}/repairs`, icon: 'fa-wrench', module: 'repairs' },
         {
-          title: 'Productos',
-          path: `${basePrefix}/products`,
+          title: 'Inventario',
+          path: `${basePrefix}/inventory_root`,
           icon: 'fa-box',
           expanded: false,
           module: 'inventory',
           children: [
-            { title: 'Categorías', path: `${basePrefix}/categories`, icon: 'fa-tags', module: 'inventory' },
-            { title: 'Marcas', path: `${basePrefix}/brands`, icon: 'fa-copyright', module: 'inventory' },
-            { title: 'Inventario', path: `${basePrefix}/inventory`, icon: 'fa-warehouse', module: 'inventory' },
-            { title: 'Ventas', path: `${basePrefix}/sales`, icon: 'fa-cash-register', module: 'inventory' },
-            { title: 'Compras', path: `${basePrefix}/purchases`, icon: 'fa-shopping-bag', module: 'inventory' },
-            { title: 'Pedidos', path: `${basePrefix}/orders`, icon: 'fa-shopping-cart', module: 'inventory' },
+            { title: 'Productos', path: `${basePrefix}/products`, icon: 'fa-boxes' },
+            { title: 'Stock', path: `${basePrefix}/inventory`, icon: 'fa-warehouse' },
+            { title: 'Categorías', path: `${basePrefix}/categories`, icon: 'fa-tags' },
+            { title: 'Marcas', path: `${basePrefix}/brands`, icon: 'fa-copyright' },
+            { title: 'Compras', path: `${basePrefix}/purchases`, icon: 'fa-shopping-bag' },
+            { title: 'Pedidos', path: `${basePrefix}/orders`, icon: 'fa-shopping-cart' },
           ]
         },
         { title: 'Clientes', path: `${basePrefix}/clients`, icon: 'fa-users', module: 'customers' },
         {
-          title: 'Empresa',
-          path: `${basePrefix}/company`,
-          icon: 'fa-building',
+          title: 'Configuración y Más',
+          path: '#',
+          icon: 'fa-cogs',
           expanded: false,
           children: [
+            { title: 'Empresa', path: `${basePrefix}/company`, icon: 'fa-building' },
             { title: 'Empleados', path: `${basePrefix}/employees`, icon: 'fa-id-card' },
             { title: 'Sucursales', path: `${basePrefix}/branches`, icon: 'fa-map-marker-alt' },
             { title: 'Proveedores', path: `${basePrefix}/suppliers`, icon: 'fa-truck' },
             { title: 'Facturación', path: `${basePrefix}/sales/invoices`, icon: 'fa-file-invoice-dollar' },
+            { title: 'Cursos', path: `${basePrefix}/courses`, icon: 'fa-graduation-cap' },
+            { title: 'Servicios', path: `${basePrefix}/services`, icon: 'fa-tools' },
+            { title: 'Usuarios', path: `${basePrefix}/users`, icon: 'fa-user-cog' },
+            { title: 'Mensajes', path: `${basePrefix}/messages`, icon: 'fa-envelope' },
+            { title: 'Entradas', path: `${basePrefix}/posts`, icon: 'fa-newspaper' },
           ]
-        },
-        { title: 'Cursos', path: `${basePrefix}/courses`, icon: 'fa-graduation-cap' },
-        { title: 'Servicios', path: `${basePrefix}/services`, icon: 'fa-tools' },
-        { title: 'Taller', path: `${basePrefix}/repairs`, icon: 'fa-wrench', module: 'repairs' },
-        { title: 'Usuarios', path: `${basePrefix}/users`, icon: 'fa-user-cog' },
-        { title: 'Mensajes', path: `${basePrefix}/messages`, icon: 'fa-envelope' },
-        { title: 'Entradas', path: `${basePrefix}/posts`, icon: 'fa-newspaper' },
+        }
       ];
 
       this.menuItems = baseItems.filter(item => {
@@ -223,5 +230,25 @@ export class AdminLayout implements OnInit, OnDestroy {
   async logout() {
     await this.authService.signOut();
     this.router.navigate(['/login']);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // Prevent default browser behavior for these specific function keys
+    if (event.key === 'F2' || event.key === 'F3' || event.key === 'F4') {
+      event.preventDefault();
+    }
+
+    switch (event.key) {
+      case 'F2':
+        this.router.navigate([this.basePrefix + '/sales']);
+        break;
+      case 'F3':
+        this.router.navigate([this.basePrefix + '/repairs']);
+        break;
+      case 'F4':
+        this.router.navigate([this.basePrefix + '/products/new']);
+        break;
+    }
   }
 }

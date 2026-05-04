@@ -86,53 +86,77 @@
       </div>
     </div>
 
+    <!-- Toolbar for Desktop App Feel (Quick Actions) -->
+    <div class="bg-base-200 border-b border-base-300 px-4 py-2 flex flex-wrap gap-2 items-center shadow-sm" role="toolbar" aria-label="Acciones Rápidas">
+      <span class="text-sm font-bold text-base-content/70 mr-2 uppercase tracking-wider hidden sm:inline-block">Acciones:</span>
+      
+      <a [routerLink]="basePrefix + '/sales'" class="btn btn-sm btn-primary" aria-label="Ingresar a la terminal de ventas o punto de venta" title="Nueva Venta (F2)">
+        <i class="fas fa-cash-register"></i> Nueva Venta
+      </a>
+      
+      <a [routerLink]="basePrefix + '/repairs'" class="btn btn-sm btn-secondary" aria-label="Agregar una nueva reparación al taller" title="Nueva Reparación (F3)">
+        <i class="fas fa-tools"></i> Nueva Reparación
+      </a>
+      
+      <a [routerLink]="basePrefix + '/products/new'" class="btn btn-sm btn-accent" aria-label="Registrar un nuevo producto en el inventario" title="Nuevo Producto (F4)">
+        <i class="fas fa-plus"></i> Nuevo Producto
+      </a>
+
+      <div class="flex-1"></div> <!-- Spacer -->
+
+      <a [routerLink]="basePrefix + '/inventory'" class="btn btn-sm btn-ghost" aria-label="Ver estado del stock e inventario">
+        <i class="fas fa-warehouse"></i> Ver Stock
+      </a>
+    </div>
+
     <!-- Page Content -->
-    <main class="flex-1 p-3 sm:p-6">
+    <main class="flex-1 p-3 sm:p-6 overflow-y-auto" role="main" aria-label="Contenido Principal">
       <router-outlet></router-outlet>
     </main>
   </div>
 
   <!-- Sidebar -->
   <div class="drawer-side z-50">
-    <label for="admin-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-    <ul class="menu p-4 w-64 min-h-full bg-gray-900 text-green-400 gap-2">
+    <label for="admin-drawer" aria-label="Cerrar menú lateral" class="drawer-overlay"></label>
+    <nav class="menu p-4 w-64 min-h-full bg-gray-900 text-green-400 gap-2 shadow-2xl border-r border-gray-800" role="navigation" aria-label="Menú principal de navegación">
       <!-- Logo -->
-      <li class="mb-6">
-        <a class="flex items-center gap-3 px-2 hover:bg-transparent cursor-pointer" [routerLink]="['/']">
+      <div class="mb-6 border-b border-gray-800 pb-4">
+        <a class="flex items-center gap-3 px-2 hover:bg-transparent cursor-pointer focus:ring-2 focus:ring-green-400 rounded-lg outline-none" [routerLink]="['/']" aria-label="Ir a la página de inicio">
           <img [src]="branchBranding().logo" [alt]="branchBranding().name + ' Logo'" class="h-8 w-auto" height="32" />
           <span class="text-xl font-bold text-white">{{ branchBranding().name }}</span>
         </a>
-      </li>
+      </div>
       <!-- Menu Items -->
+      <ul class="w-full flex flex-col gap-1 p-0 m-0 list-none">
       @for (item of menuItems; track item.path) {
       <li>
         @if (item.children) {
         <div class="flex items-center gap-1">
           @if (item.path !== '#') {
-            <a [routerLink]="item.path" routerLinkActive="bg-green-800 text-white"
-              class="flex-1 flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 hover:text-green-300 transition-colors">
-              <i class="fas {{item.icon}} w-5 text-center"></i>
-              <span class="font-medium">{{item.title}}</span>
+            <a [routerLink]="item.path" routerLinkActive="bg-green-800 text-white font-bold shadow-inner"
+              class="flex-1 flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 hover:text-green-300 transition-colors focus:ring-2 focus:ring-green-400 outline-none" [attr.aria-label]="'Ir a ' + item.title">
+              <i class="fas {{item.icon}} w-5 text-center" aria-hidden="true"></i>
+              <span class="font-medium text-[15px]">{{item.title}}</span>
             </a>
           } @else {
-            <div (click)="toggleMenu(item)" class="flex-1 flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 hover:text-green-300 transition-colors cursor-pointer select-none">
-              <i class="fas {{item.icon}} w-5 text-center"></i>
-              <span class="font-medium">{{item.title}}</span>
-            </div>
+            <button (click)="toggleMenu(item)" class="flex-1 flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 hover:text-green-300 transition-colors cursor-pointer select-none text-left focus:ring-2 focus:ring-green-400 outline-none" [attr.aria-expanded]="item.expanded" [attr.aria-label]="'Expandir menú ' + item.title">
+              <i class="fas {{item.icon}} w-5 text-center" aria-hidden="true"></i>
+              <span class="font-medium text-[15px]">{{item.title}}</span>
+            </button>
           }
-          <button (click)="toggleMenu(item)"
-            class="px-3 py-3 rounded-lg hover:bg-gray-800 transition-colors text-green-400 hover:text-green-300">
-            <i class="fas fa-chevron-down transition-transform duration-200" [class.rotate-180]="item.expanded"></i>
+          <button (click)="toggleMenu(item)" [attr.aria-label]="item.expanded ? 'Colapsar submenú de ' + item.title : 'Expandir submenú de ' + item.title"
+            class="px-3 py-3 rounded-lg hover:bg-gray-800 transition-colors text-green-400 hover:text-green-300 focus:ring-2 focus:ring-green-400 outline-none">
+            <i class="fas fa-chevron-down transition-transform duration-200" [class.rotate-180]="item.expanded" aria-hidden="true"></i>
           </button>
         </div>
 
         @if (item.expanded) {
-        <ul class="pl-4 mt-1 space-y-1 border-l border-gray-700 ml-6">
+        <ul class="pl-4 mt-1 space-y-1 border-l-2 border-gray-700 ml-6 list-none" role="group" [attr.aria-label]="'Submenú de ' + item.title">
           @for (child of item.children; track child.path) {
           <li>
-            <a [routerLink]="child.path" routerLinkActive="text-green-300 font-bold"
-              class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors text-sm text-green-500 hover:text-green-300">
-              <i class="fas {{child.icon}} w-4 text-center"></i>
+            <a [routerLink]="child.path" routerLinkActive="text-green-300 font-bold bg-gray-800/50"
+              class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors text-sm text-gray-300 hover:text-green-300 focus:ring-2 focus:ring-green-400 outline-none" [attr.aria-label]="'Ir a ' + child.title">
+              <i class="fas {{child.icon}} w-4 text-center" aria-hidden="true"></i>
               <span>{{child.title}}</span>
             </a>
           </li>
@@ -140,32 +164,35 @@
         </ul>
         }
         } @else {
-        <a [routerLink]="item.path" routerLinkActive="bg-green-800 text-white"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 hover:text-green-300 transition-colors">
-          <i class="fas {{item.icon}} w-5 text-center"></i>
-          <span class="font-medium">{{item.title}}</span>
+        <a [routerLink]="item.path" routerLinkActive="bg-green-800 text-white font-bold shadow-inner"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 hover:text-green-300 transition-colors focus:ring-2 focus:ring-green-400 outline-none" [attr.aria-label]="'Ir a ' + item.title">
+          <i class="fas {{item.icon}} w-5 text-center" aria-hidden="true"></i>
+          <span class="font-medium text-[15px]">{{item.title}}</span>
         </a>
         }
       </li>
       }
+      </ul>
 
       <div class="divider divider-neutral my-4"></div>
 
       <!-- User & Logout -->
-      <li>
-        <a routerLink="/perfil" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 hover:text-green-300">
-          <i class="fas fa-user-circle w-5 text-center"></i>
-          <span>Mi Perfil</span>
-        </a>
-      </li>
-      <li>
-        <button (click)="logout()"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-900/30 text-red-400 hover:text-red-300">
-          <i class="fas fa-sign-out-alt w-5 text-center"></i>
-          <span>Cerrar Sesión</span>
-        </button>
-      </li>
-    </ul>
+      <ul class="w-full flex flex-col gap-1 p-0 m-0 list-none mt-auto">
+        <li>
+          <a routerLink="/perfil" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 hover:text-green-300 focus:ring-2 focus:ring-green-400 outline-none" aria-label="Ir a tu perfil de usuario">
+            <i class="fas fa-user-circle w-5 text-center" aria-hidden="true"></i>
+            <span>Mi Perfil</span>
+          </a>
+        </li>
+        <li>
+          <button (click)="logout()"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-900/30 text-red-400 hover:text-red-300 focus:ring-2 focus:ring-red-400 outline-none" aria-label="Cerrar sesión de forma segura">
+            <i class="fas fa-sign-out-alt w-5 text-center" aria-hidden="true"></i>
+            <span>Cerrar Sesión</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
   </div>
 </div>
 

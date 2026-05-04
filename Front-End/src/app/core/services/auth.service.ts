@@ -220,6 +220,10 @@ export class AuthService {
   }
 
   async getUser(): Promise<User | null> {
+    const offlineToken = localStorage.getItem('local_offline_token');
+    if (offlineToken) {
+       return this.authState.value.user;
+    }
     const {
       data: { user },
     } = await this.supabase.auth.getUser();
@@ -231,11 +235,19 @@ export class AuthService {
   }
 
   async getSession(): Promise<Session | null> {
+    const offlineToken = localStorage.getItem('local_offline_token');
+    if (offlineToken) {
+       return this.authState.value.session;
+    }
     const { data } = await this.supabase.auth.getSession();
     return data.session;
   }
 
   async getUserProfile(userId: string): Promise<UserProfile | null> {
+    const offlineToken = localStorage.getItem('local_offline_token');
+    if (offlineToken && userId === 'offline-admin-id') {
+       return this.authState.value.profile;
+    }
     return this.profileService.getProfile(userId);
   }
 

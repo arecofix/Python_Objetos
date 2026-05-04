@@ -43,11 +43,14 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/perfil';
     
-    this.authService.authState$
+      this.authService.authState$
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
         if (state.user) {
-          const target = this.sanitizeReturnUrl(this.returnUrl);
+          let target = this.sanitizeReturnUrl(this.returnUrl);
+          if (this.authService.isSuperAdmin() && target === '/perfil') {
+            target = '/admin/dashboard';
+          }
           const currentUrl = this.router.url.split('?')[0];
           if (target !== currentUrl) {
             this.router.navigate([target]);
@@ -87,7 +90,10 @@ export class LoginComponent implements OnInit, OnDestroy {
       }
       
       this.success = '¡Bienvenido! Redirigiendo...';
-      const target = this.sanitizeReturnUrl(this.returnUrl);
+      let target = this.sanitizeReturnUrl(this.returnUrl);
+      if (this.authService.isSuperAdmin() && target === '/perfil') {
+        target = '/admin/dashboard';
+      }
       setTimeout(() => {
         this.router.navigate([target]);
       }, 1500);

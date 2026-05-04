@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios Técnicos - Carrito de Compras</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+    
+    <div class="app-container">
+        <header class="glass-panel">
+            <h1>Servicios Técnicos</h1>
+            <p>Contrata el mejor mantenimiento para tu equipo</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Catálogo de Servicios -->
+            <section class="catalog-section glass-panel">
+                <h2>Servicios Disponibles</h2>
+                <div id="services-list" class="services-grid">
+                    <!-- Servicios se cargarán aquí dinámicamente -->
+                    <div class="loading-spinner">Cargando servicios...</div>
+                </div>
+            </section>
+
+            <!-- Carrito de Compras -->
+            <section class="cart-section glass-panel">
+                <h2>Tu Carrito</h2>
+                <div id="cart-items" class="cart-items-container">
+                    <!-- Items del carrito -->
+                </div>
+                
+                <div class="cart-summary">
+                    <div class="total-row">
+                        <span>Total:</span>
+                        <span id="cart-total" class="total-amount">$0</span>
+                    </div>
+                    <button id="checkout-btn" class="primary-btn" disabled>Proceder al Pago</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
