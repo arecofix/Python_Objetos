@@ -12,6 +12,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { LoggerService } from './logger.service';
 import { ProfileService } from './profile.service';
 import { TenantService } from './tenant.service';
+import { LocalApiService } from './local-api.service';
 import { UserProfile } from '@app/shared/interfaces/user.interface';
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
@@ -28,6 +29,7 @@ export class AuthService {
   private platformId = inject(PLATFORM_ID);
   private profileService = inject(ProfileService);
   private tenantService = inject(TenantService);
+  private localApiService = inject(LocalApiService);
   private ngZone = inject(NgZone);
   
   // Súper Administrador Global
@@ -80,6 +82,17 @@ export class AuthService {
   }
 
   private async initAuth() {
+    // Check offline token first
+    const offlineToken = localStorage.getItem('local_offline_token');
+    if (offlineToken) {
+       const mockUser: User = { id: 'offline-admin-id', app_metadata: {}, user_metadata: {}, aud: 'authenticated', created_at: new Date().toISOString(), email: 'admin' } as any;
+       const mockSession: Session = { access_token: offlineToken, refresh_token: '', expires_in: 86400, token_type: 'bearer', user: mockUser };
+       const mockProfile: UserProfile = { id: 'offline-admin-id', email: 'admin', role: 'super_admin' } as any;
+       
+       this.authState.next({ session: mockSession, user: mockUser, profile: mockProfile });
+       this.isSuperAdmin.set(true);
+    }
+
     try {
       const { data: { session }, error } = await this.supabase.auth.getSession();
       
@@ -106,9 +119,13 @@ export class AuthService {
       async (event: AuthChangeEvent, session: Session | null) => {
         this.logger.info(`Auth Event: ${event}`);
         
+        const isOffline = !!localStorage.getItem('local_offline_token');
+
         if (event === 'SIGNED_OUT') {
-           this.authState.next({ session: null, user: null, profile: null });
-           this.isSuperAdmin.set(false);
+           if (!isOffline) {
+               this.authState.next({ session: null, user: null, profile: null });
+               this.isSuperAdmin.set(false);
+           }
            return;
         }
 
@@ -118,7 +135,7 @@ export class AuthService {
           if (profile && (TENANT_CONSTANTS.SUPER_ADMIN_EMAILS.includes(profile.email || '') || profile.role === 'super_admin')) {
             this.isSuperAdmin.set(true);
           }
-        } else {
+        } else if (!isOffline) {
           this.authState.next({ session: null, user: null, profile: null });
           this.isSuperAdmin.set(false);
         }
@@ -191,7 +208,10 @@ export class AuthService {
   }
 
   async signOut(): Promise<string | null> {
+    this.localApiService.logoutOffline();
     const { error } = await this.supabase.auth.signOut();
+    this.authState.next({ session: null, user: null, profile: null });
+    this.isSuperAdmin.set(false);
     return error ? error.message : null;
   }
 
@@ -262,7 +282,60 @@ export class AuthService {
   }
 
   async signIn(email: string, password: string): Promise<any> {
-    return this.supabase.auth.signInWithPassword({ email, password });
+    try {
+      // First check if it looks like an offline admin account or local fallback
+      if (email === 'admin' || !email.includes('@')) {
+         return this.attemptOfflineLogin(email, password);
+      }
+
+      const res = await this.supabase.auth.signInWithPassword({ email, password });
+      if (res.error) {
+        // Fallback for network errors
+        if (res.error.message.includes('fetch') || res.error.message.includes('Network') || res.error.message.includes('Failed to fetch')) {
+            return this.attemptOfflineLogin(email, password);
+        }
+        return res;
+      }
+      return res;
+    } catch (error: any) {
+      return this.attemptOfflineLogin(email, password);
+    }
+  }
+
+  private async attemptOfflineLogin(email: string, password: string): Promise<any> {
+    this.logger.info('Attempting offline login fallback');
+    try {
+       const localRes = await this.localApiService.loginOffline(email, password);
+       if (localRes && localRes.token) {
+           const mockUser: User = {
+               id: localRes.admin.id || 'offline-admin-id',
+               app_metadata: {},
+               user_metadata: {},
+               aud: 'authenticated',
+               created_at: new Date().toISOString(),
+               email: email
+           } as any;
+           const mockSession: Session = {
+               access_token: localRes.token,
+               refresh_token: '',
+               expires_in: 86400,
+               token_type: 'bearer',
+               user: mockUser
+           };
+           const mockProfile: UserProfile = {
+               id: localRes.admin.id || 'offline-admin-id',
+               email: email,
+               role: 'super_admin'
+           } as any;
+           
+           this.authState.next({ session: mockSession, user: mockUser, profile: mockProfile });
+           this.isSuperAdmin.set(true);
+           return { data: { session: mockSession, user: mockUser }, error: null };
+       }
+       return { data: null, error: { message: 'Invalid offline credentials' } };
+    } catch (e) {
+       return { data: null, error: { message: 'Network error and offline login failed.' } };
+    }
   }
 
   async signUp(

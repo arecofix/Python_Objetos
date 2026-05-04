@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, firstValueFrom } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 export interface HealthResponse {
@@ -22,8 +22,46 @@ export interface HealthResponse {
 })
 export class LocalApiService {
   private readonly baseUrl = environment.localEngineUrl;
+  private readonly TOKEN_KEY = 'local_offline_token';
 
   constructor(private http: HttpClient) {}
+
+  /**
+   * Genera las cabeceras HTTP incluyendo el Token JWT local si existe.
+   */
+  private getHeaders(): { headers: HttpHeaders } {
+    let headers = new HttpHeaders();
+    const token = localStorage.getItem(this.TOKEN_KEY);
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return { headers };
+  }
+
+  /**
+   * Inicia sesión en el motor local (Offline).
+   */
+  async loginOffline(username: string, password: string):Promise<any> {
+    try {
+      const response: any = await firstValueFrom(
+        this.http.post(`${this.baseUrl}/login`, { username, password })
+      );
+      if (response && response.token) {
+        localStorage.setItem(this.TOKEN_KEY, response.token);
+      }
+      return response;
+    } catch (error) {
+      this.handleError(error as HttpErrorResponse);
+      throw error;
+    }
+  }
+
+  /**
+   * Cierra la sesión local.
+   */
+  logoutOffline(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+  }
 
   /**
    * Verifica la conexión y salud del motor de datos local.
@@ -46,7 +84,7 @@ export class LocalApiService {
    * Obtiene los productos del inventario local (SQLite).
    */
   getProductos(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/productos`)
+    return this.http.get<any[]>(`${this.baseUrl}/productos`, this.getHeaders())
       .pipe(catchError(this.handleError));
   }
 
@@ -54,7 +92,7 @@ export class LocalApiService {
    * Registra un producto en la base de datos local.
    */
   addProducto(producto: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/productos`, producto)
+    return this.http.post<any>(`${this.baseUrl}/productos`, producto, this.getHeaders())
       .pipe(catchError(this.handleError));
   }
 
@@ -62,7 +100,7 @@ export class LocalApiService {
    * Obtiene los clientes registrados localmente.
    */
   getClientes(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/clientes`)
+    return this.http.get<any[]>(`${this.baseUrl}/clientes`, this.getHeaders())
       .pipe(catchError(this.handleError));
   }
 

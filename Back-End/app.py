@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 from pathlib import Path
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, Producto, Cliente, ServicioTecnico, Admin
+import jwt
+import datetime
+from functools import wraps
 
 # 1. Configuración de Rutas Seguras y Compatibles (Windows/Linux)
 BASE_DIR = Path(__file__).resolve().parent
@@ -25,6 +28,7 @@ CORS(app, resources={r"/api/*": {"origins": [FRONTEND_URL, "http://localhost:420
 db_path = BASE_DIR / 'arecofix_local.sqlite'
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'local-offline-engine-secret-key-2026')
 
 db.init_app(app)
 
@@ -51,6 +55,34 @@ def get_health():
         "mode": "Offline-First"
     })
 
+# --- AUTHENTICATION & JWT DECORATOR ---
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        # Support generic Bearer token
+        if 'Authorization' in request.headers:
+            parts = request.headers['Authorization'].split()
+            if len(parts) == 2 and parts[0] == 'Bearer':
+                token = parts[1]
+                
+        if not token:
+            return jsonify({'error': 'Token is missing!'}), 401
+            
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            current_user = Admin.query.filter_by(id=data['id']).first()
+            if not current_user:
+                raise Exception("User not found")
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token has expired!'}), 401
+        except Exception as e:
+            return jsonify({'error': 'Token is invalid!', 'message': str(e)}), 401
+            
+        return f(current_user, *args, **kwargs)
+    return decorated
+
 # --- AUTHENTICATION (ADMIN OFFLINE LOGIN) ---
 
 @app.route('/api/login', methods=['POST'])
@@ -62,8 +94,15 @@ def offline_login():
     admin = Admin.query.filter_by(username=username).first()
     
     if admin and check_password_hash(admin.password_hash, password):
+        token = jwt.encode({
+            'id': admin.id,
+            'username': admin.username,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+        }, app.config['SECRET_KEY'], algorithm="HS256")
+        
         return jsonify({
             "message": "Login offline exitoso",
+            "token": token,
             "admin": {"id": admin.id, "username": admin.username}
         }), 200
         
@@ -73,12 +112,14 @@ def offline_login():
 # --- INVENTARIO (PRODUCTOS) ---
 
 @app.route('/api/productos', methods=['GET'])
-def get_productos():
+@token_required
+def get_productos(current_user):
     productos = Producto.query.all()
     return jsonify([p.to_dict() for p in productos])
 
 @app.route('/api/productos', methods=['POST'])
-def add_producto():
+@token_required
+def add_producto(current_user):
     data = request.json
     nuevo = Producto(
         nombre=data.get('nombre'),
@@ -94,12 +135,14 @@ def add_producto():
 # --- CLIENTES ---
 
 @app.route('/api/clientes', methods=['GET'])
-def get_clientes():
+@token_required
+def get_clientes(current_user):
     clientes = Cliente.query.all()
     return jsonify([c.to_dict() for c in clientes])
 
 @app.route('/api/clientes', methods=['POST'])
-def add_cliente():
+@token_required
+def add_cliente(current_user):
     data = request.json
     nuevo = Cliente(
         nombre=data.get('nombre'),
@@ -114,7 +157,8 @@ def add_cliente():
 # --- SERVICIOS TÉCNICOS ---
 
 @app.route('/api/servicios', methods=['GET'])
-def get_servicios():
+@token_required
+def get_servicios(current_user):
     servicios = ServicioTecnico.query.all()
     return jsonify([s.to_dict() for s in servicios])
 

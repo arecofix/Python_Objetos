@@ -18,7 +18,7 @@ supabase: Client = None
 if SUPABASE_URL and SUPABASE_KEY and "your_project_url" not in SUPABASE_URL:
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def check_internet(host="http://google.com"):
+def check_internet(host="http://1.1.1.1"):
     """Verifica si hay conexión a internet."""
     try:
         urllib.request.urlopen(host, timeout=3)
@@ -61,9 +61,50 @@ def sync_data(app):
                 except Exception as e:
                     print(f"  [Error] Fallo al sincronizar producto {p.nombre}: {e}")
 
-        # Aquí harías lo mismo para Clientes y ServicioTecnico
-        # clientes_no_sync = Cliente.query.filter_by(is_synced=False).all()
-        # ...
+        # 2. Sincronizar Clientes
+        clientes_no_sync = Cliente.query.filter_by(is_synced=False).all()
+        if clientes_no_sync:
+            print(f"[Sync Engine] Encontrados {len(clientes_no_sync)} clientes no sincronizados.")
+            for c in clientes_no_sync:
+                try:
+                    data = {
+                        "id": c.id,
+                        "nombre": c.nombre,
+                        "telefono": c.telefono,
+                        "email": c.email,
+                        "dni": c.dni
+                    }
+                    supabase.table("clientes").upsert(data).execute()
+                    
+                    c.is_synced = True
+                    db.session.commit()
+                    print(f"  -> Cliente {c.nombre} sincronizado.")
+                except Exception as e:
+                    print(f"  [Error] Fallo al sincronizar cliente {c.nombre}: {e}")
+
+        # 3. Sincronizar Servicios Técnicos
+        servicios_no_sync = ServicioTecnico.query.filter_by(is_synced=False).all()
+        if servicios_no_sync:
+            print(f"[Sync Engine] Encontrados {len(servicios_no_sync)} servicios no sincronizados.")
+            for s in servicios_no_sync:
+                try:
+                    data = {
+                        "id": s.id,
+                        "cliente_id": s.cliente_id,
+                        "equipo": s.equipo,
+                        "falla": s.falla,
+                        "estado": s.estado,
+                        "precio_presupuesto": s.precio_presupuesto,
+                        "fecha_ingreso": s.fecha_ingreso.isoformat() if s.fecha_ingreso else None,
+                        "observaciones": s.observaciones
+                    }
+                    supabase.table("servicios_tecnicos").upsert(data).execute()
+                    
+                    s.is_synced = True
+                    db.session.commit()
+                    print(f"  -> Servicio {s.equipo} sincronizado.")
+                except Exception as e:
+                    print(f"  [Error] Fallo al sincronizar servicio {s.equipo}: {e}")
 
 def run_sync_loop(app, interval_seconds=60):
     """Bucle infinito que ejecuta la sincronización periódicamente."""
