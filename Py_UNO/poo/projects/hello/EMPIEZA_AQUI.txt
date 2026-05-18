@@ -1,0 +1,271 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                             ║
+║                 🎓 ¡BIENVENIDO A UNIVERSIDAD API - FLASK! 🎓               ║
+║                                                                             ║
+║                   ✅ TU PROYECTO ESTÁ 100% CONFIGURADO                     ║
+║                                                                             ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+🚀 EMPIEZA AQUÍ - 3 PASOS SIMPLES
+═══════════════════════════════════════════════════════════════════════════
+
+  PASO 1: Abre una terminal (PowerShell o CMD)
+  ─────────────────────────────────────────────
+  Navega a la carpeta del proyecto:
+    cd C:\Users\Ezequiel\Desktop\Utilidades\Universidad\poo
+
+
+  PASO 2: Inicia la aplicación (elige una opción)
+  ───────────────────────────────────────────────
+  
+  🟢 OPCIÓN 1 (MÁS SIMPLE - Recomendado)
+     Ejecuta: .\start.bat
+     (Se abrirá automáticamente una ventana con el servidor)
+  
+  🔵 OPCIÓN 2 (PowerShell)
+     Ejecuta: .\_run.ps1
+     (Verás información detallada del servidor)
+  
+  🟠 OPCIÓN 3 (Manual)
+     Ejecuta estos comandos en orden:
+        .\.venv\Scripts\Activate.ps1
+        python run.py
+
+
+  PASO 3: Abre tu navegador y accede a:
+  ────────────────────────────────────
+  
+  🔍 Health Check (Verifica que funciona):
+     http://127.0.0.1:5000/api/health
+     
+  Deberías ver algo así:
+     { "status": "healthy", "version": "1.0.0" }
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+✨ DESPUÉS DE INICIAR - QUÉ PUEDES HACER
+═══════════════════════════════════════════════════════════════════════════
+
+Usa Postman, Insomnia, o PowerShell para probar los endpoints:
+
+
+📋 CREAR UN ESTUDIANTE
+──────────────────────
+
+POST http://127.0.0.1:5000/api/estudiantes
+
+Body (JSON):
+{
+  "nombre": "Juan Pérez",
+  "email": "juan@example.com",
+  "carrera": "Ingeniería Informática"
+}
+
+Response:
+{
+  "status": "success",
+  "message": "Estudiante creado exitosamente",
+  "data": {
+    "id": "1",
+    "nombre": "Juan Pérez",
+    "email": "juan@example.com",
+    "carrera": "Ingeniería Informática"
+  }
+}
+
+
+¿QUIERES PROBARLO CON PowerShell?
+──────────────────────────────────
+
+Copiar y ejecutar este código:
+
+$body = @{
+    nombre = "María García"
+    email = "maria@example.com"
+    carrera = "Ingeniería Informática"
+} | ConvertTo-Json
+
+Invoke-WebRequest `
+  -Uri "http://127.0.0.1:5000/api/estudiantes" `
+  -Method POST `
+  -Headers @{"Content-Type"="application/json"} `
+  -Body $body
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+📚 TODOS LOS ENDPOINTS DISPONIBLES
+═══════════════════════════════════════════════════════════════════════════
+
+ESTUDIANTES
+──────────
+
+  GET    http://127.0.0.1:5000/api/estudiantes
+         → Obtener TODOS los estudiantes
+
+  GET    http://127.0.0.1:5000/api/estudiantes/1
+         → Obtener UN estudiante específico (reemplaza 1 con el ID)
+
+  POST   http://127.0.0.1:5000/api/estudiantes
+         → Crear nuevo estudiante
+         Body: { "nombre", "email", "carrera" }
+
+  PUT    http://127.0.0.1:5000/api/estudiantes/1
+         → Actualizar estudiante
+         Body: { "nombre", "email", "carrera" } (solo lo que quieras cambiar)
+
+  DELETE http://127.0.0.1:5000/api/estudiantes/1
+         → Eliminar estudiante
+
+
+MATERIAS
+────────
+
+  GET    http://127.0.0.1:5000/api/materias
+         → Obtener TODAS las materias
+
+  GET    http://127.0.0.1:5000/api/materias/1
+         → Obtener UNA materia específica
+
+  POST   http://127.0.0.1:5000/api/materias
+         → Crear nueva materia
+         Body: { "nombre", "profesor", "creditos" }
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+❓ PREGUNTAS FRECUENTES
+═══════════════════════════════════════════════════════════════════════════
+
+P: ¿Dónde veo que el servidor está funcionando?
+R: Deberías ver algo así en la terminal:
+   
+   ════════════════════════════════════════════════════════════════
+    Iniciando Universidad API
+   ════════════════════════════════════════════════════════════════
+    API: http://127.0.0.1:5000
+    Health: http://127.0.0.1:5000/api/health
+   
+
+
+P: ¿Cómo paro el servidor?
+R: Presiona CTRL+C en la terminal donde está corriendo
+
+
+P: ¿Qué pasa si el puerto 5000 ya está en uso?
+R: Edita el archivo run.py (última línea) y cambia:
+   app.run(port=5000)  →  app.run(port=5001)
+
+
+P: ¿Dónde están los datos que creo?
+R: Se guardan en memoria en este momento. Si quieres una base de datos
+   real, revisa el README.md para instrucciones de escalabilidad
+
+
+P: ¿Cómo hago cambios al código?
+R: Puedes editar cualquier archivo .py. El servidor se recargará
+   automáticamente (porque tiene debug mode habilitado)
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+📖 DOCUMENTACIÓN DISPONIBLE
+═══════════════════════════════════════════════════════════════════════════
+
+Lee estos archivos para más información:
+
+  📄 README.md
+     Documentación técnica completa, arquitectura, explicaciones
+
+  📄 INICIO_RAPIDO.md
+     Guía rápida paso a paso (en Español)
+
+  📄 RESUMEN.txt
+     Resumen visual de todo lo que incluye el proyecto
+
+  💻 Código comentado
+     Cada función tiene docstrings explicando qué hace
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+🏗️ ESTRUCTURA DEL PROYECTO (Resumida)
+═══════════════════════════════════════════════════════════════════════════
+
+app/ ← Todo el código está aquí
+├── models/        ← Entidades (Estudiante, Materia)
+├── routes/        ← Endpoints del API
+├── services/      ← Lógica de negocio
+├── utils/         ← Funciones reutilizables
+└── config.py      ← Configuración
+
+Cada carpeta está bien organizada siguiendo Clean Architecture
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+🎯 PRÓXIMOS PASOS (Una vez que funciona)
+═══════════════════════════════════════════════════════════════════════════
+
+1. Prueba crear y obtener estudiantes
+2. Lee README.md para entender la arquitectura
+3. Explora el código, está bien documentado
+4. Para escalar: lee about Base de Datos en README.md
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+⚡ COMANDO RÁPIDO
+═══════════════════════════════════════════════════════════════════════════
+
+Si quieres empezar ya, simplemente ejecuta en PowerShell:
+
+  .\start.bat
+
+¡Eso es todo! El servidor estará corriendo en 2 segundos.
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+🆘 ¿ALGO NO FUNCIONA?
+═══════════════════════════════════════════════════════════════════════════
+
+1. Ejecuta: .\verify.ps1
+   (Verifica que todo esté bien configurado)
+
+2. Verifica que estés en la carpeta correcta:
+   c:\Users\Ezequiel\Desktop\Utilidades\Universidad\poo
+
+3. Si el entorno virtual no funciona:
+   Ejecuta: ._setup.ps1
+   (Reconfigura todo)
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+✨ IMPORTANTE: CAMBIOS ANTES DE PRODUCCIÓN
+═══════════════════════════════════════════════════════════════════════════
+
+En el archivo .env cambiar:
+
+  FLASK_ENV=development   →  FLASK_ENV=production
+  FLASK_DEBUG=True        →  FLASK_DEBUG=False
+  SECRET_KEY=...          →  SECRET_KEY=<clave segura de 32+ caracteres>
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+✅ TODO LISTO
+
+Tu aplicación Flask con Clean Architecture está completamente configurada.
+Todos los archivos necesarios existen y están bien organizados.
+
+¡Ahora es tu turno! 🚀
+
+Ejecuta: .\start.bat
+
+═══════════════════════════════════════════════════════════════════════════
+                          Creado con ❤️ usando Flask
+═══════════════════════════════════════════════════════════════════════════
