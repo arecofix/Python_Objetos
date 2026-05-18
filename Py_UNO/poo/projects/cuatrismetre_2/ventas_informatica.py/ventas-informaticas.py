@@ -66,12 +66,19 @@ class GestionVentas:
     def ventas_por_vendedor(self) -> dict[str, float]:
         vv: dict[str, float] = {}
         for cada_venta in self.ventas:
-            if cada_venta.vendedor not in vv.keys():
-                vv.update({cada_venta.vendedor: cada_venta.monto_venta()})
-            else:
-                valor_actual = vv[cada_venta.vendedor]
-                nuevo_valor = valor_actual + cada_venta.monto_venta()
-                vv.update({cada_venta.vendedor: nuevo_valor})
+
+            vendedor = cada_venta.vendedor
+            monto = cada_venta.monto_venta()
+            #if cada_venta.vendedor not in vv.keys():
+            #    vv.update({cada_venta.vendedor: cada_venta.monto_venta()})
+            #else:
+            #    valor_actual = vv[cada_venta.vendedor]
+            #    nuevo_valor = valor_actual + cada_venta.monto_venta()
+            #    vv.update({cada_venta.vendedor: nuevo_valor})
+            nuevo_valor = vv.setdefault(vendedor, 0)
+            nuevo_valor += monto
+            vv.update({cada_venta.vendedor: nuevo_valor})
+
         return vv
 
     def mostrar_ventas_por_vendedor(self):
